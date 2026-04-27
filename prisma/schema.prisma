@@ -1,0 +1,918 @@
+// Sistema modular de gestão de creche — modelo de dados principal
+// SQLite em dev; troque provider/url para PostgreSQL em produção.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+enum AttendanceStatus {
+  PRESENT
+  ABSENT
+  LATE
+  JUSTIFIED
+}
+
+enum InventoryCategory {
+  CLEANING
+  SCHOOL_SUPPLIES
+  PHARMACY
+  BUILDING_MAINTENANCE
+}
+
+enum CameraStatus {
+  ONLINE
+  OFFLINE
+  MAINTENANCE
+}
+
+enum FinancialDirection {
+  IN
+  OUT
+}
+
+enum FinancialKind {
+  TUITION
+  PAYMENT
+  PIX
+  BOLETO
+  RECEIPT
+  DEBIT
+  DEPOSIT
+  RENT
+  PARKING
+  OTHER
+}
+
+enum FinancialStatus {
+  PENDING
+  SETTLED
+  CANCELLED
+  OVERDUE
+}
+
+enum AccessSessionKind {
+  PARKING
+  PROPERTY
+}
+
+enum AccessSessionStatus {
+  OPEN
+  CLOSED
+  CANCELLED
+}
+
+/** Escopo da categoria cadastrável (funcionário, fornecedor ou estoque por módulo). */
+enum CategoryScope {
+  EMPLOYEE
+  SUPPLIER
+  STOCK_CLEANING
+  STOCK_SCHOOL_SUPPLIES
+  STOCK_PHARMACY
+  STOCK_BUILDING_MAINTENANCE
+}
+
+/** Perfil de acesso ao sistema (independente de cadastros acadêmicos). */
+enum UserProfileRole {
+  ADMIN
+  TEACHER
+  STUDENT
+  PARENT
+  LEGAL_GUARDIAN
+}
+
+/**
+ * Conta de acesso: login por e-mail ou nome de usuário, JWT em cookie httpOnly,
+ * permissões granulares e 2FA opcional (TOTP).
+ */
+model UserAccount {
+  id        String          @id @default(cuid())
+  email     String          @unique
+  /** Identificador para login alternativo ao e-mail (normalizado, único). */
+  loginName String          @unique
+  displayName String
+  phone       String?
+  document    String?
+  active      Boolean         @default(true)
+  passwordHash String
+  profileRole UserProfileRole
+  /** Lista JSON de chaves de permissão; mesclada com padrão do perfil no login. */
+  permissionsJson String    @default("[]")
+  twoFactorEnabled Boolean   @default(false)
+  /** Secret Base32 para TOTP (armazenado só quando 2FA está habilitado). */
+  twoFactorSecret String?
+  /** Quando preenchido (pais / responsável legal), a conta enxerga só alunos vinculados a este responsável. */
+  guardianId  String?
+  guardian    Guardian?     @relation(fields: [guardianId], references: [id], onDelete: SetNull)
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
+  passwordResetTokens PasswordResetToken[]
+  activityLogs      UserActivityLog[]
+  muralEventsCreated MuralEvent[]
+
+  @@index([guardianId])
+}
+
+/** Eventos de auditoria (login, gestão de usuários, etc.) para monitoramento. */
+model UserActivityLog {
+  id          String   @id @default(cuid())
+  createdAt   DateTime @default(now())
+  /** Conta que executou a ação (vazio em tentativas anônimas ou fluxos públicos). */
+  actorUserId String?
+  actor       UserAccount? @relation(fields: [actorUserId], references: [id], onDelete: SetNull)
+  /** Código estável do evento (ex.: AUTH_LOGIN_SUCCESS). */
+  action      String
+  /** JSON com detalhes (IDs, e-mails mascarados, motivo). */
+  detailsJson String?
+  ip          String?
+
+  @@index([createdAt])
+  @@index([actorUserId])
+  @@index([action])
+}
+
+/** Token único para link de redefinição de senha (apenas hash armazenado). */
+model PasswordResetToken {
+  id        String    @id @default(cuid())
+  userId    String
+  tokenHash String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+  user      UserAccount @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model Shift {
+  id        String      @id @default(cuid())
+  name      String
+  startTime String
+  endTime   String
+  /** Duração padrão de cada bloco de atividade com a turma (minutos). */
+  lessonDurationMinutes Int @default(45)
+  /** Intervalo de lanche após o bloco de aula (minutos). */
+  snackDurationMinutes  Int @default(15)
+  classRooms ClassRoom[]
+}
+
+/** Salas físicas da unidade (ambientes onde ocorrem as turmas). */
+model PhysicalRoom {
+  id        String   @id @default(cuid())
+  code      String   @unique
+  name      String
+  floor     String?
+  capacity  Int?
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  classRooms ClassRoom[]
+}
+
+model ClassRoom {
+  id          String       @id @default(cuid())
+  name        String
+  room        String?
+  teacherName String?
+  capacity    Int          @default(20)
+  year        Int
+  active      Boolean      @default(true)
+  shiftId     String
+  shift       Shift        @relation(fields: [shiftId], references: [id], onDelete: Cascade)
+  physicalRoomId String?
+  physicalRoom   PhysicalRoom? @relation(fields: [physicalRoomId], references: [id], onDelete: SetNull)
+  enrollments Enrollment[]
+
+  @@index([physicalRoomId])
+}
+
+model Student {
+  id          String              @id @default(cuid())
+  matricula   String?             @unique
+  name        String
+  active      Boolean             @default(true)
+  birthDate   DateTime?
+  notes       String?
+  allergies   String?
+  healthNotes String?
+  dietaryNotes String?
+  photoUrl    String?
+  /** Preferência de pagamento da mensalidade (código: PIX, BOLETO, etc.). */
+  tuitionPaymentMethod String?
+  /** Parcelas/pagamentos já quitados ao iniciar o ano letivo. */
+  yearStartInstallmentsPaid Int?
+  /** Se a família deu entrada (valor inicial) no contrato. */
+  madeEntryPayment          Boolean?
+  /** Apostilas/material: PAID_START, PAY_DURING_YEAR, NOT_APPLICABLE. */
+  didacticMaterialsPlan     String?
+  /** Se havia débito de ano(s) letivo(s) anterior(es). */
+  owedPreviousSchoolYears   Boolean?
+  /** Desconto sobre mensalidade / acerto, em centavos (BRL). */
+  tuitionDiscountCents             Int?
+  /** Valor base da mensalidade combinado, em centavos (BRL). */
+  tuitionMonthlyAmountCents        Int?
+  /** Valor de apostilas / material (início do ano), em centavos (BRL). */
+  didacticMaterialsAmountCents     Int?
+  /** Data do pagamento / referência do acordo (recibo). */
+  tuitionPaymentDate               DateTime?
+  /** Detalhes por forma de pagamento (JSON): PIX, banco, boleto, cartão, etc. */
+  tuitionPaymentDetailsJson        String?
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+  guardians   StudentGuardian[]
+  enrollments Enrollment[]
+  attendances AttendanceRecord[]
+  grades      GradeRecord[]
+  history     AcademicHistoryEntry[]
+  financial   FinancialRecord[]
+  messages    StudentMessage[]
+}
+
+model Guardian {
+  id            String            @id @default(cuid())
+  name          String
+  phone         String?
+  email         String?
+  document      String?
+  photoUrl      String?
+  street        String?
+  number        String?
+  complement    String?
+  neighborhood  String?
+  city          String?
+  state         String?
+  zip           String?
+  students      StudentGuardian[]
+  userAccounts  UserAccount[]
+}
+
+/** Função/cargo cadastrável para vínculo com funcionários (lista editável na administração). */
+model EmployeeJobRole {
+  id        String    @id @default(cuid())
+  name      String
+  active    Boolean   @default(true)
+  sortOrder Int       @default(0)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  teachers  Teacher[]
+
+  @@unique([name])
+}
+
+/** Categoria cadastrável (funcionário, fornecedor ou subcategoria de item de estoque por módulo). */
+model RegistryCategory {
+  id        String         @id @default(cuid())
+  name      String
+  scope     CategoryScope
+  active    Boolean        @default(true)
+  sortOrder Int            @default(0)
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+  teachers  Teacher[]      @relation("EmployeeRegistryCategory")
+  suppliers Supplier[]     @relation("SupplierRegistryCategory")
+  inventoryItems InventoryItem[] @relation("StockRegistryCategory")
+
+  @@unique([name, scope])
+}
+
+/** Funcionário(a) da unidade — cadastro para identificação, vínculo e contato. */
+model Teacher {
+  id           String    @id @default(cuid())
+  /** Código interno (ex.: P20260001); gerado automaticamente ou informado manualmente. */
+  employeeCode String?   @unique
+  name         String
+  /** Nome informal usado no dia a dia. */
+  nickname     String?
+  /** Cargo ou função (texto legado; preferir `employeeJobRole`). */
+  jobRole      String?
+  /** Função cadastrada na administração. */
+  employeeJobRoleId String?
+  employeeJobRole   EmployeeJobRole? @relation(fields: [employeeJobRoleId], references: [id], onDelete: SetNull)
+  /** Categoria do funcionário (cadastro auxiliar). */
+  employeeCategoryId String?
+  employeeCategory   RegistryCategory? @relation("EmployeeRegistryCategory", fields: [employeeCategoryId], references: [id], onDelete: SetNull)
+  active       Boolean   @default(true)
+  birthDate    DateTime?
+  phone        String?
+  email        String?
+  document     String?
+  specialty    String?
+  notes        String?
+  photoUrl     String?
+  street       String?
+  number       String?
+  complement   String?
+  neighborhood String?
+  city         String?
+  state        String?
+  zip          String?
+  /** CTPS — número. */
+  workCardNumber        String?
+  /** CTPS — série. */
+  workCardSeries        String?
+  /** CTPS — UF (2 letras). */
+  workCardUf            String?
+  /** Data de admissão / registro. */
+  admissionDate         DateTime?
+  /** Data de encerramento do vínculo (opcional). */
+  dismissalDate         DateTime?
+  /** Salário mensal em centavos (BRL). */
+  salaryCents           Int?
+  /** Forma de pagamento do salário (códigos como PIX, BOLETO…). */
+  salaryPaymentMethod   String?
+  /** Dia do mês em que o salário é pago (1–31). */
+  salaryPaymentDay      Int?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@index([employeeJobRoleId])
+  @@index([employeeCategoryId])
+}
+
+model StudentGuardian {
+  studentId          String
+  guardianId         String
+  relation           String?
+  pickupAuthorized   Boolean  @default(false)
+  student            Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  guardian           Guardian @relation(fields: [guardianId], references: [id], onDelete: Cascade)
+
+  @@id([studentId, guardianId])
+}
+
+model Enrollment {
+  id          String   @id @default(cuid())
+  studentId   String
+  classRoomId String
+  enrolledAt  DateTime @default(now())
+  status      String   @default("ACTIVE")
+  student     Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  classRoom   ClassRoom @relation(fields: [classRoomId], references: [id], onDelete: Cascade)
+
+  @@index([classRoomId])
+  @@index([studentId])
+}
+
+model AttendanceRecord {
+  id        String           @id @default(cuid())
+  studentId String
+  date      DateTime
+  status    AttendanceStatus @default(PRESENT)
+  entryAt   DateTime?
+  exitAt    DateTime?
+  note      String?
+  /** Destaque visual (alerta do dia) na lista de presença. */
+  alertFlag Boolean          @default(false)
+  student   Student          @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@unique([studentId, date])
+  @@index([date])
+}
+
+model Subject {
+  id     String        @id @default(cuid())
+  name   String
+  grades GradeRecord[]
+}
+
+model GradeRecord {
+  id        String   @id @default(cuid())
+  studentId String
+  subjectId String?
+  title     String
+  period    String
+  score     Float
+  maxScore  Float    @default(10)
+  comment   String?
+  createdAt DateTime @default(now())
+  student   Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  subject   Subject? @relation(fields: [subjectId], references: [id], onDelete: SetNull)
+
+  @@index([studentId])
+}
+
+model AcademicHistoryEntry {
+  id         String   @id @default(cuid())
+  studentId  String
+  schoolYear String
+  summary    String
+  details    String?
+  createdAt  DateTime @default(now())
+  student    Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@index([studentId])
+}
+
+model InventoryItem {
+  id              String            @id @default(cuid())
+  createdAt       DateTime          @default(now())
+  category        InventoryCategory
+  name            String
+  /** Classificação do produto (texto; sincronizada com a categoria cadastrada quando houver). */
+  productCategory String?
+  /** Categoria cadastrada na administração (escopo conforme o módulo de estoque). */
+  stockRegistryCategoryId String?
+  stockRegistryCategory   RegistryCategory? @relation("StockRegistryCategory", fields: [stockRegistryCategoryId], references: [id], onDelete: SetNull)
+  /** Marca / fabricante. */
+  brand           String?
+  /** Código interno (ex.: L20260001); gerado automaticamente ou informado manualmente. */
+  sku             String?           @unique
+  quantity        Float             @default(0)
+  minQuantity     Float             @default(0)
+  unit            String            @default("UN")
+  location        String?
+  /** URL pública da foto do item (ex.: `/uploads/estoque/...`). */
+  imageUrl        String?
+  /** Preço unitário de referência em centavos (BRL), para valor em estoque. */
+  unitPriceCents  Int               @default(0)
+  movements       StockMovement[]
+
+  @@index([stockRegistryCategoryId])
+}
+
+model StockMovement {
+  id             String        @id @default(cuid())
+  itemId         String
+  quantityChange Float
+  reason         String?
+  createdAt      DateTime      @default(now())
+  item           InventoryItem @relation(fields: [itemId], references: [id], onDelete: Cascade)
+
+  @@index([itemId])
+}
+
+model SecurityCamera {
+  id        String       @id @default(cuid())
+  name      String
+  location  String?
+  streamUrl String?
+  vendor    String?
+  status    CameraStatus @default(OFFLINE)
+  notes     String?
+}
+
+/** Fornecedor de materiais e serviços para a unidade. */
+model Supplier {
+  id           String   @id @default(cuid())
+  /** Código interno da unidade (ex.: F20260001); gerado automaticamente ou informado manualmente. */
+  supplierCode String?  @unique
+  /** Razão social ou nome do fornecedor. */
+  name         String
+  /** Nome fantasia (opcional). */
+  tradeName    String?
+  /** CNPJ, CPF ou outro documento (texto livre). */
+  document     String?
+  phone        String?
+  email        String?
+  street       String?
+  number       String?
+  complement   String?
+  neighborhood String?
+  city         String?
+  state        String?
+  zip          String?
+  notes        String?
+  /** Forma de pagamento combinada (PIX, boleto, transferência, etc.). */
+  paymentMethod String?
+  /** Data de referência para pagamento ou próximo vencimento acordado. */
+  paymentDate   DateTime?
+  active       Boolean  @default(true)
+  supplierCategoryId String?
+  supplierCategory   RegistryCategory? @relation("SupplierRegistryCategory", fields: [supplierCategoryId], references: [id], onDelete: SetNull)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([name])
+  @@index([supplierCategoryId])
+}
+
+model FinancialRecord {
+  id          String             @id @default(cuid())
+  direction   FinancialDirection
+  kind        FinancialKind
+  status      FinancialStatus    @default(PENDING)
+  amountCents Int
+  dueDate     DateTime?
+  settledAt   DateTime?
+  description String?
+  externalRef String?
+  studentId   String?
+  /** Filial responsável por este lançamento (multi-unidade). */
+  branchId    String?
+  branch      Branch?            @relation(fields: [branchId], references: [id], onDelete: SetNull)
+  /** Ativo vinculado (ex.: imóvel ou estacionamento); campos opcionais para relatórios por ativo. */
+  propertyId  String?
+  property    Property?          @relation(fields: [propertyId], references: [id], onDelete: SetNull)
+  parkingFacilityId String?
+  parkingFacility   ParkingFacility? @relation(fields: [parkingFacilityId], references: [id], onDelete: SetNull)
+  /** Sessão de entrada/saída que originou o lançamento (ex.: estacionamento). */
+  accessSessionId String? @map("accessRecordId")
+  accessSession   AccessSession? @relation(fields: [accessSessionId], references: [id], onDelete: SetNull)
+  accessPaymentParts AccessPaymentPart[]
+  metadata    String?
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+  student     Student?           @relation(fields: [studentId], references: [id], onDelete: SetNull)
+
+  @@index([dueDate])
+  @@index([status])
+  @@index([kind])
+  @@index([branchId])
+  @@index([propertyId])
+  @@index([parkingFacilityId])
+  @@index([accessSessionId])
+}
+
+/**
+ * Sessão de uso (entrada → saída) para controle de cobrança em imóveis e estacionamentos.
+ * Mapeada para a tabela já migrada `AccessRecord`.
+ */
+model AccessSession {
+  id               String             @id @default(cuid())
+  kind             AccessSessionKind  @map("assetType")
+  status           AccessSessionStatus @default(OPEN)
+  branchId         String?
+  propertyId       String?
+  parkingFacilityId String?
+  plate            String?            @map("vehiclePlate")
+  vehicleType      String?
+  customerName     String?
+  customerDocument String?
+  phone            String?
+  entryAt          DateTime           @default(now())
+  exitAt           DateTime?
+  /** Valor final cobrado (centavos BRL). */
+  finalAmountCents Int                @default(0) @map("chargedCents")
+  /** Total pago acumulado (centavos BRL). Detalhes em `AccessPaymentPart`. */
+  paidCents        Int                @default(0)
+  note             String?
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+
+  branch           Branch?            @relation(fields: [branchId], references: [id], onDelete: SetNull)
+  property         Property?          @relation(fields: [propertyId], references: [id], onDelete: SetNull)
+  parkingFacility  ParkingFacility?   @relation(fields: [parkingFacilityId], references: [id], onDelete: SetNull)
+  payments         AccessPaymentPart[]
+  financialRecords FinancialRecord[]
+  pricingPlanId    String?
+  pricingPlan      AccessPricingPlan? @relation(fields: [pricingPlanId], references: [id], onDelete: SetNull)
+
+  @@index([entryAt])
+  @@index([exitAt])
+  @@index([status])
+  @@index([branchId])
+  @@index([propertyId])
+  @@index([parkingFacilityId])
+  @@index([plate])
+  @@index([pricingPlanId])
+  @@map("AccessRecord")
+}
+
+model AccessPricingPlan {
+  id                String   @id @default(cuid())
+  active            Boolean  @default(true)
+  name              String
+  kind              AccessSessionKind
+  branchId          String?
+  propertyId        String?
+  parkingFacilityId String?
+  /** Tamanho da fração (minutos) para cobrança (estacionamento). */
+  fractionMinutes   Int?     @default(60)
+  /** Preço por fração (centavos BRL). */
+  pricePerFractionCents Int? @default(0)
+  graceMinutes      Int?     @default(0)
+  dailyMaxCents     Int?
+  /** Preço fixo (centavos BRL) para casos não-fracionados (ex.: visita/diária). */
+  fixedPriceCents   Int?
+  notes             String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  branch            Branch?          @relation(fields: [branchId], references: [id], onDelete: SetNull)
+  property          Property?        @relation(fields: [propertyId], references: [id], onDelete: SetNull)
+  parkingFacility   ParkingFacility? @relation(fields: [parkingFacilityId], references: [id], onDelete: SetNull)
+  sessions          AccessSession[]
+
+  @@index([active])
+  @@index([kind])
+  @@index([branchId])
+  @@index([propertyId])
+  @@index([parkingFacilityId])
+}
+
+model AccessPaymentPart {
+  id              String   @id @default(cuid())
+  sessionId       String
+  amountCents     Int
+  paymentMethod   String?
+  paidAt          DateTime?
+  notes           String?
+  /** Lançamento financeiro gerado para esta parte (opcional, 1:1). */
+  financialRecordId String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  session         AccessSession  @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  financialRecord FinancialRecord? @relation(fields: [financialRecordId], references: [id], onDelete: SetNull)
+
+  @@index([sessionId])
+  @@index([paidAt])
+  @@index([financialRecordId])
+}
+
+/** Filial / unidade operacional (estacionamento, imobiliária, ou unidade administrativa). */
+model Branch {
+  id        String   @id @default(cuid())
+  code      String?  @unique
+  name      String
+  active    Boolean  @default(true)
+  phone     String?
+  email     String?
+  document  String?
+  street        String?
+  number        String?
+  complement    String?
+  neighborhood  String?
+  city          String?
+  state         String?
+  zip           String?
+  notes     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  properties Property[]
+  parkingFacilities ParkingFacility[]
+  financialRecords FinancialRecord[]
+  accessSessions AccessSession[]
+  accessPricingPlans AccessPricingPlan[]
+
+  @@index([name])
+}
+
+enum PropertyKind {
+  HOUSE
+  APARTMENT
+  COMMERCIAL
+  LAND
+  WAREHOUSE
+  OTHER
+}
+
+enum PropertyStatus {
+  AVAILABLE
+  RENTED
+  MAINTENANCE
+  INACTIVE
+}
+
+/** Imóvel/propriedade gerenciada. Pode ou não estar vinculada a uma filial. */
+model Property {
+  id        String   @id @default(cuid())
+  branchId  String?
+  branch    Branch?  @relation(fields: [branchId], references: [id], onDelete: SetNull)
+  code      String?  @unique
+  name      String
+  kind      PropertyKind @default(OTHER)
+  status    PropertyStatus @default(AVAILABLE)
+  description String?
+  street        String?
+  number        String?
+  complement    String?
+  neighborhood  String?
+  city          String?
+  state         String?
+  zip           String?
+  /** Valor sugerido de aluguel mensal (centavos BRL). */
+  rentSuggestedCents Int?
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  leases LeaseContract[]
+  financialRecords FinancialRecord[]
+  accessSessions AccessSession[]
+  accessPricingPlans AccessPricingPlan[]
+
+  @@index([branchId])
+  @@index([name])
+  @@index([status])
+}
+
+enum TenantType {
+  PERSON
+  COMPANY
+}
+
+/** Locatário (pessoa física ou jurídica). */
+model Tenant {
+  id        String   @id @default(cuid())
+  type      TenantType @default(PERSON)
+  name      String
+  document  String?
+  phone     String?
+  email     String?
+  notes     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  leases LeaseContract[]
+
+  @@index([name])
+}
+
+enum LeaseStatus {
+  DRAFT
+  ACTIVE
+  ENDED
+  CANCELLED
+}
+
+/** Contrato de locação. Lançamentos financeiros (aluguéis, multas, taxas) podem referenciar `propertyId`. */
+model LeaseContract {
+  id         String   @id @default(cuid())
+  propertyId String
+  tenantId   String
+  status     LeaseStatus @default(DRAFT)
+  startsAt   DateTime
+  endsAt     DateTime?
+  /** Valor mensal acordado (centavos BRL). */
+  monthlyRentCents Int
+  /** Dia de vencimento (1–31). */
+  dueDay     Int @default(5)
+  depositCents Int?
+  notes      String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  property Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  tenant   Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([propertyId])
+  @@index([tenantId])
+  @@index([status])
+}
+
+enum ParkingFacilityStatus {
+  ACTIVE
+  MAINTENANCE
+  INACTIVE
+}
+
+/** Estacionamento (filial/garagem). */
+model ParkingFacility {
+  id        String   @id @default(cuid())
+  branchId  String?
+  branch    Branch?  @relation(fields: [branchId], references: [id], onDelete: SetNull)
+  code      String?  @unique
+  name      String
+  status    ParkingFacilityStatus @default(ACTIVE)
+  addressLabel String?
+  capacityCars Int?
+  capacityMotorcycles Int?
+  notes     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  financialRecords FinancialRecord[]
+  accessSessions AccessSession[]
+  accessPricingPlans AccessPricingPlan[]
+
+  @@index([branchId])
+  @@index([name])
+  @@index([status])
+}
+
+/**
+ * Cadastro único da unidade (CNPJ, banco, PIX, parâmetros de cobrança e contas a pagar).
+ * Usado por boletos, PIX, depósitos, faturas e integrações futuras.
+ */
+model CompanySettings {
+  id String @id @default("default")
+
+  legalName               String?
+  tradeName               String?
+  cnpj                    String?
+  stateRegistration       String?
+  municipalRegistration   String?
+
+  phone        String?
+  financeEmail String?
+  website      String?
+
+  street         String?
+  number         String?
+  complement     String?
+  neighborhood   String?
+  city           String?
+  state          String?
+  zip            String?
+
+  bankCode       String?
+  bankName       String?
+  agency         String?
+  agencyDigit    String?
+  accountNumber  String?
+  accountDigit   String?
+  accountType    String?
+
+  /** Chave PIX da recebedora (alternativa ou complemento a variáveis de ambiente). */
+  pixKey     String?
+  pixKeyType String?
+
+  boletoConvenio     String?
+  boletoCarteira     String?
+  boletoVariacao     String?
+  boletoInstrucoes   String?
+  boletoBatchNotes   String?
+
+  /** Pagamento de NF-e / faturas de fornecedores. */
+  invoicePaymentNotes String?
+  depositNotes        String?
+  nfeNotes            String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+/** Formas de pagamento de mensalidade que a unidade adere / oferece (política interna). */
+model AcceptedSchoolPaymentMethod {
+  id        String   @id @default(cuid())
+  /** Código alinhado a `TUITION_PAYMENT_OPTIONS` (PIX, BOLETO…). */
+  code      String   @unique
+  active    Boolean  @default(true)
+  sortOrder Int      @default(0)
+  /** Observações para a equipe (ex.: só na secretaria, banco X). */
+  notes     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum StudentMessageDeliveryStatus {
+  QUEUED
+  SENT
+  PARTIAL
+  FAILED
+}
+
+/** Sentido da mensagem no fio com a família (agenda / presença). */
+enum StudentMessageDirection {
+  SCHOOL_TO_FAMILY
+  FAMILY_TO_SCHOOL
+}
+
+/** Mensagens do professor/escola para responsáveis do aluno (agenda). */
+model StudentMessage {
+  id        String   @id @default(cuid())
+  studentId String
+  createdAt DateTime @default(now())
+  /** Texto livre enviado. */
+  body      String
+  /** Quem enviou (texto livre para UI); opcional. */
+  authorLabel String?
+  /** Escola → família ou família → escola. */
+  direction StudentMessageDirection @default(SCHOOL_TO_FAMILY)
+  /**
+   * Família → escola: quando a equipe abre o histórico (ex.: presença), marca leitura
+   * para contador de “não lidas” na lista do dia.
+   */
+  readAt    DateTime?
+  /** JSON com destinatários (snapshot no envio). */
+  toEmailsJson String @default("[]")
+  toPhonesJson String @default("[]")
+  /** Resultado do envio. */
+  deliveryStatus StudentMessageDeliveryStatus @default(QUEUED)
+  /** JSON com erros/retornos por canal (opcional). */
+  deliveryDetailsJson String?
+
+  student Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@index([studentId, createdAt])
+  @@index([studentId, direction, readAt])
+}
+
+/** Evento agendado para exibição no Mural (semana e calendário). */
+model MuralEvent {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  /** Início do evento (timezone local do servidor). */
+  startsAt    DateTime
+  /** Fim do evento (opcional). Quando vazio, assume duração zero. */
+  endsAt      DateTime?
+  /** Quando true, evento aparece como “dia todo”. */
+  allDay      Boolean  @default(false)
+
+  createdByUserId String?
+  createdBy       UserAccount? @relation(fields: [createdByUserId], references: [id], onDelete: SetNull)
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([startsAt])
+  @@index([endsAt])
+  @@index([createdByUserId])
+}

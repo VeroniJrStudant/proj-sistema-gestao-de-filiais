@@ -1,0 +1,159 @@
+@import "tailwindcss";
+
+/* `dark:` do Tailwind segue a classe `dark` em <html> (definida pelo seletor de tema). */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/*
+ * Paleta confortável: fundos levemente azulados (menos brilho que branco puro),
+ * texto em azul-acinzentado (menos contraste agressivo que preto),
+ * acento teal-azul distinto dos neutros; alertas em âmbar suave.
+ *
+ * Tema claro: :root (padrão). Tema escuro: html.dark — controlado por script + localStorage.
+ */
+:root {
+  --shell: #e9ecf3;
+  --panel: #dfe3ec;
+  --elevated: #f4f6fa;
+  --elevated-2: #fbfcfe;
+
+  --ink: #1a2230;
+  --muted: #475569;
+  --subtle: #64748b;
+
+  --line: #c4ccd8;
+  --line-soft: #e1e6ee;
+
+  --accent: #2d6b78;
+  --accent-hover: #255a65;
+  --on-accent: #ffffff;
+  --accent-soft: #e0eef1;
+  --accent-border: #9ebfc8;
+  --accent-muted: #4a8a99;
+
+  --caution: #b45309;
+  --caution-soft: #fdf6eb;
+  --caution-border: #e5d9c4;
+
+  --success-bg: #e2f3eb;
+  --success-fg: #134a32;
+  --success-border: #a8cfbb;
+
+  --warn-bg: #faf6ef;
+  --warn-border: #e3d5bc;
+  --warn-text: #4a3d24;
+  --warn-muted: #6f6244;
+
+  --danger-bg: #fceeef;
+  --danger-border: #e8c9cd;
+  --danger-text: #6b2a30;
+
+  --background: var(--shell);
+  --foreground: var(--ink);
+}
+
+html.dark {
+  --shell: #12151c;
+  --panel: #191e27;
+  --elevated: #1f252f;
+  --elevated-2: #252b36;
+
+  --ink: #e6e9ef;
+  --muted: #9ca8b8;
+  --subtle: #8490a3;
+
+  --line: #323a48;
+  --line-soft: #282f3a;
+
+  --accent: #5cb0c2;
+  --accent-hover: #7bc4d2;
+  --on-accent: #0a0e12;
+  --accent-soft: #1a2f36;
+  --accent-border: #3a5f6a;
+  --accent-muted: #8cc4d0;
+
+  --caution: #fbbf77;
+  --caution-soft: #2a2319;
+  --caution-border: #453a28;
+
+  --success-bg: #152a22;
+  --success-fg: #8ed9ae;
+  --success-border: #2d4a3d;
+
+  --warn-bg: #221e18;
+  --warn-border: #3a3228;
+  --warn-text: #f2e8d4;
+  --warn-muted: #c4b596;
+
+  --danger-bg: #2a1f22;
+  --danger-border: #4a3438;
+  --danger-text: #f0d4d8;
+
+  --background: var(--shell);
+  --foreground: var(--ink);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-shell: var(--shell);
+  --color-panel: var(--panel);
+  --color-elevated: var(--elevated);
+  --color-elevated-2: var(--elevated-2);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-subtle: var(--subtle);
+  --color-line: var(--line);
+  --color-line-soft: var(--line-soft);
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-on-accent: var(--on-accent);
+  --color-accent-soft: var(--accent-soft);
+  --color-accent-border: var(--accent-border);
+  --color-accent-muted: var(--accent-muted);
+  --color-caution: var(--caution);
+  --color-caution-soft: var(--caution-soft);
+  --color-caution-border: var(--caution-border);
+  --color-success-bg: var(--success-bg);
+  --color-success-fg: var(--success-fg);
+  --color-success-border: var(--success-border);
+  --color-warn-bg: var(--warn-bg);
+  --color-warn-border: var(--warn-border);
+  --color-warn-text: var(--warn-text);
+  --color-warn-muted: var(--warn-muted);
+  --color-danger-bg: var(--danger-bg);
+  --color-danger-border: var(--danger-border);
+  --color-danger-text: var(--danger-text);
+  --color-brand-300: var(--accent-border);
+  --color-brand-400: var(--accent-muted);
+  --color-brand-700: var(--accent);
+  --color-brand-800: var(--accent-hover);
+  /* Aliases usados em páginas legadas (ex.: financeiro) */
+  --color-app-text: var(--ink);
+  --color-app-text-secondary: var(--muted);
+  --color-app-text-tertiary: var(--subtle);
+  --color-app-border: var(--line);
+  --color-app-border-muted: var(--line-soft);
+  --color-app-elevated: var(--elevated-2);
+  --color-app-surface: var(--elevated);
+  --color-app-accent: var(--accent);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+body {
+  margin: 0;
+  background: var(--background);
+  color: var(--foreground);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+/* Impressão do documento de débito: oculta menu lateral (classe aplicada em `DebitDocPrintBodyClass`). */
+@media print {
+  body.debit-doc-print aside {
+    display: none !important;
+  }
+  body.debit-doc-print main {
+    padding: 0.5rem !important;
+    background: #fff !important;
+  }
+}
