@@ -34,7 +34,7 @@ export default function AdministracaoPage() {
         <p className="text-[11px] font-semibold uppercase tracking-wider text-accent-muted">Área administrativa</p>
         <h1 className="mt-2 text-2xl font-bold tracking-tight text-ink sm:text-3xl">Administração</h1>
         <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted">
-          Cadastros principais e manutenção do sistema: pessoas, fornecedores, estoques e usuários.
+          Cadastros principais e manutenção do sistema: pessoas, fornecedores, almoxarifado e usuários.
         </p>
       </header>
 
@@ -46,10 +46,11 @@ export default function AdministracaoPage() {
         />
         <Card title="Funcionários" description="Cadastro e edição de funcionários (código, contato, vínculo)." href="/funcionarios/novo" />
         <Card title="Fornecedores" description="Cadastro e edição de fornecedores (código, pagamento, endereço)." href="/fornecedores" />
-        <Card title="Estoque — limpeza" description="Insumos de higiene e limpeza; entradas, saídas e mínimos." href="/estoque/limpeza" />
-        <Card title="Estoque — materiais escolar" description="Materiais didáticos e papelaria; controle e reposição." href="/estoque/escolar" />
-        <Card title="Farmácia escolar" description="Primeiros socorros e itens controlados; movimentações." href="/estoque/farmacia" />
-        <Card title="Zeladoria do prédio" description="Manutenção e conservação predial; itens e reposição." href="/estoque/zeladoria" />
+        <Card
+          title="Almoxarifado"
+          description="Limpeza, material escolar, farmácia escolar e zeladoria — um único painel com abas por setor."
+          href="/estoque/almoxarifado"
+        />
         <Card title="Usuários" description="Perfis de acesso, permissões e gerenciamento de contas." href="/usuarios" />
       </section>
     </div>

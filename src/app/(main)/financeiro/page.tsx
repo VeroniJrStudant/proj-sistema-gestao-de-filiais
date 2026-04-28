@@ -138,8 +138,8 @@ export default async function FinanceiroPage({
         <header>
           <h1 className="text-xl font-semibold text-ink">Financeiro</h1>
           <p className="mt-1 max-w-3xl text-sm text-muted">
-            Política de formas de pagamento, visão do contrato por aluno (mensalidade, entrada, material e
-            débitos) e lançamentos recentes — para apoio à secretaria e ao dia a dia.
+            Política de formas de pagamento, visão do contrato por aluno (mensalidade, entrada, material e débitos),
+            entradas e saídas resumidas em duas áreas, e lançamentos recentes — apoio à secretaria e ao dia a dia.
           </p>
         </header>
 
@@ -160,53 +160,28 @@ export default async function FinanceiroPage({
             </Link>
           ) : null}
           <Link
-            href="/financeiro/pagamentos-pais"
-            className="group rounded-2xl border border-line-soft bg-elevated-2 p-4 shadow-sm transition hover:border-accent-border hover:shadow-md"
+            href="/financeiro/entradas"
+            className="group rounded-2xl border border-line-soft bg-elevated-2 p-4 shadow-sm transition hover:border-accent-border hover:shadow-md sm:col-span-2 lg:col-span-2"
           >
-            <h2 className="text-sm font-semibold text-ink">Pagamentos para pais e responsáveis</h2>
+            <h2 className="text-sm font-semibold text-ink">Entradas</h2>
             <p className="mt-2 text-sm text-muted">
-              Gerar PIX, boleto, cartão (à vista, parcelado ou recorrente) e pedido de NF-e, com vínculo ao
-              aluno quando necessário.
+              Mensalidades recebidas ou a cobrar, pagamentos para famílias (PIX, cartão, boleto, NF) e PIX impresso —
+              agrupados em subpáginas.
             </p>
             <span className="mt-3 inline-block text-xs font-medium text-accent-muted group-hover:underline">
-              Abrir →
+              Abrir entradas →
             </span>
           </Link>
           <Link
-            href="/financeiro/pix-impresso"
-            className="group rounded-2xl border border-line-soft bg-elevated-2 p-4 shadow-sm transition hover:border-accent-border hover:shadow-md"
+            href="/financeiro/saidas"
+            className="group rounded-2xl border border-line-soft bg-elevated-2 p-4 shadow-sm transition hover:border-accent-border hover:shadow-md lg:col-span-1"
           >
-            <h2 className="text-sm font-semibold text-ink">PIX para impressão</h2>
+            <h2 className="text-sm font-semibold text-ink">Saídas</h2>
             <p className="mt-2 text-sm text-muted">
-              QR Code, Pix copia e cola e código de barras de referência para a família pagar de qualquer lugar.
+              Pagamentos a fornecedores, funcionários e favorecidos — hoje com lançamentos em lote.
             </p>
             <span className="mt-3 inline-block text-xs font-medium text-accent-muted group-hover:underline">
-              Abrir →
-            </span>
-          </Link>
-          <Link
-            href="/financeiro/lancamentos-lote"
-            className="group rounded-2xl border border-line-soft bg-elevated-2 p-4 shadow-sm transition hover:border-accent-border hover:shadow-md"
-          >
-            <h2 className="text-sm font-semibold text-ink">Lançamentos em lote (pagamentos)</h2>
-            <p className="mt-2 text-sm text-muted">
-              Vários pagamentos de uma vez: fornecedores, funcionários ou outros favorecidos (saídas no financeiro).
-            </p>
-            <span className="mt-3 inline-block text-xs font-medium text-accent-muted group-hover:underline">
-              Abrir →
-            </span>
-          </Link>
-          <Link
-            href="/financeiro/recebimento"
-            className="group rounded-2xl border border-line-soft bg-elevated-2 p-4 shadow-sm transition hover:border-accent-border hover:shadow-md sm:col-span-2 lg:col-span-1"
-          >
-            <h2 className="text-sm font-semibold text-ink">Recebimento de mensalidades</h2>
-            <p className="mt-2 text-sm text-muted">
-              Registrar pagamento já recebido (PIX, dinheiro, transferência) ou boleto em aberto para
-              controle interno.
-            </p>
-            <span className="mt-3 inline-block text-xs font-medium text-accent-muted group-hover:underline">
-              Abrir →
+              Abrir saídas →
             </span>
           </Link>
         </section>

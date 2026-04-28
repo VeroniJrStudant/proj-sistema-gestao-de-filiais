@@ -35,28 +35,28 @@ export const MODULE_REGISTRY: readonly ModuleDefinition[] = [
     id: "stock_cleaning",
     label: "Estoque — limpeza",
     description: "Insumos de higiene e limpeza.",
-    href: "/estoque/limpeza",
+    href: "/estoque/almoxarifado?aba=limpeza",
     inventoryCategories: ["CLEANING"],
   },
   {
     id: "stock_school",
     label: "Estoque — materiais escolares",
     description: "Papelaria, jogos e materiais didáticos.",
-    href: "/estoque/escolar",
+    href: "/estoque/almoxarifado?aba=escolar",
     inventoryCategories: ["SCHOOL_SUPPLIES"],
   },
   {
     id: "stock_pharmacy",
     label: "Farmácia escolar",
     description: "Itens de primeiros socorros e uso controlado.",
-    href: "/estoque/farmacia",
+    href: "/estoque/almoxarifado?aba=farmacia",
     inventoryCategories: ["PHARMACY"],
   },
   {
     id: "stock_building",
     label: "Zeladoria do prédio",
     description: "Material de manutenção e conservação.",
-    href: "/estoque/zeladoria",
+    href: "/estoque/almoxarifado?aba=zeladoria",
     inventoryCategories: ["BUILDING_MAINTENANCE"],
   },
   {
@@ -68,7 +68,7 @@ export const MODULE_REGISTRY: readonly ModuleDefinition[] = [
   {
     id: "finance",
     label: "Financeiro",
-    description: "Mensalidades, PIX, boletos, recibos, débitos e depósitos.",
+    description: "Entradas e saídas (mensalidades, cobranças, PIX, lote a pagar), recibos e configuração.",
     href: "/financeiro",
   },
   {
@@ -85,9 +85,9 @@ export const MODULE_REGISTRY: readonly ModuleDefinition[] = [
   },
   {
     id: "leases",
-    label: "Locações",
-    description: "Contratos de locação, vencimentos e status.",
-    href: "/locacoes",
+    label: "Serviços",
+    description: "Rotinas e cadastros de serviços da unidade.",
+    href: "/servicos/catalogo",
   },
   {
     id: "parking",

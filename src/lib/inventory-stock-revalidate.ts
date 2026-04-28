@@ -1,10 +1,17 @@
 import { revalidatePath } from "next/cache";
-import { INVENTORY_STOCK_META } from "@/lib/inventory-stock-meta";
+import { inventoryStockListRevalidatePath } from "@/lib/inventory-stock-meta";
 
-/** Revalida as quatro páginas de estoque (após mudança em categorias de item). */
+const LEGACY_STOCK_PATHS = [
+  "/estoque/limpeza",
+  "/estoque/escolar",
+  "/estoque/farmacia",
+  "/estoque/zeladoria",
+] as const;
+
+/** Revalida a página única do almoxarifado e rotas antigas (redirecionam). */
 export function revalidateAllInventoryStockPages(): void {
-  const paths = new Set(Object.values(INVENTORY_STOCK_META).map((m) => m.path));
-  for (const p of paths) {
+  revalidatePath(inventoryStockListRevalidatePath());
+  for (const p of LEGACY_STOCK_PATHS) {
     revalidatePath(p);
   }
 }

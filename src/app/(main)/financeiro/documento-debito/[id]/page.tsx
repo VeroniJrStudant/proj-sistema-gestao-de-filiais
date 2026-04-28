@@ -58,7 +58,7 @@ export default async function DocumentoDebitoPrintPage({
       <DebitDocPrintBodyClass className="debit-doc-print" />
       <div className="mx-auto min-w-0 max-w-2xl space-y-6 px-3 sm:px-4">
         <nav className="print:hidden text-sm text-muted">
-          <Link href="/financeiro/pagamentos-pais" className="text-accent-muted underline decoration-dotted hover:text-accent">
+          <Link href="/financeiro/entradas/pagamentos-pais" className="text-accent-muted underline decoration-dotted hover:text-accent">
             Pagamentos para famílias
           </Link>
           <span className="text-subtle"> · </span>
@@ -68,7 +68,7 @@ export default async function DocumentoDebitoPrintPage({
         <div className="flex flex-wrap items-center justify-between gap-3 print:hidden">
           <PrintPageButton />
           <Link
-            href="/financeiro/pagamentos-pais"
+            href="/financeiro/entradas/pagamentos-pais"
             className="text-sm font-medium text-accent-muted underline decoration-dotted hover:text-accent"
           >
             ← Voltar

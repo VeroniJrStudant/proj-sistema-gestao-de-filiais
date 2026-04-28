@@ -2,11 +2,32 @@
 
 import { useState } from "react";
 
-const STORAGE_KEY = "creche-theme";
+const STORAGE_THEME = "creche-theme";
+const STORAGE_PALETTE = "creche-palette";
 
 function readThemeFromDom(): "light" | "dark" {
   if (typeof document === "undefined") return "light";
   return document.documentElement.classList.contains("dark") ? "dark" : "light";
+}
+
+/** Claro = sempre paleta Cachoeira Park; escuro = paleta padrão (sem `data-palette`). */
+function syncPaletteWithTheme(mode: "light" | "dark") {
+  const root = document.documentElement;
+  if (mode === "dark") {
+    root.removeAttribute("data-palette");
+    try {
+      localStorage.removeItem(STORAGE_PALETTE);
+    } catch {
+      /* ignore */
+    }
+  } else {
+    root.setAttribute("data-palette", "park");
+    try {
+      localStorage.setItem(STORAGE_PALETTE, "park");
+    } catch {
+      /* ignore */
+    }
+  }
 }
 
 function applyTheme(mode: "light" | "dark") {
@@ -16,8 +37,9 @@ function applyTheme(mode: "light" | "dark") {
   } else {
     root.classList.remove("dark");
   }
+  syncPaletteWithTheme(mode);
   try {
-    localStorage.setItem(STORAGE_KEY, mode);
+    localStorage.setItem(STORAGE_THEME, mode);
   } catch {
     /* ignore */
   }
@@ -49,10 +71,14 @@ export function ThemeToggle({ compact = false }: ThemeToggleProps) {
       {!compact ? (
         <p className="mb-2 px-1 text-[10px] font-semibold uppercase tracking-wider text-muted">Aparência</p>
       ) : null}
-      <div className={groupClass} role="group" aria-label="Tema claro ou escuro">
+      <div
+        className={groupClass}
+        role="group"
+        aria-label="Tema: cores Cachoeira Park (claro) ou escuro padrão"
+      >
         <button
           type="button"
-          title="Tema claro"
+          title="Claro com cores Cachoeira Park (cachoeirapark.com.br)"
           onClick={() => {
             applyTheme("light");
             setTheme("light");
@@ -61,11 +87,11 @@ export function ThemeToggle({ compact = false }: ThemeToggleProps) {
           aria-pressed={theme !== null && !isDark}
         >
           <IconSun className="h-4 w-4 shrink-0" />
-          {!compact ? "Claro" : null}
+          {!compact ? "CP" : null}
         </button>
         <button
           type="button"
-          title="Tema escuro"
+          title="Tema escuro (paleta padrão)"
           onClick={() => {
             applyTheme("dark");
             setTheme("dark");

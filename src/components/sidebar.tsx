@@ -20,7 +20,15 @@ export function Sidebar({
 }) {
   const pathname = usePathname();
   const financeModule = modules.find((m) => m.id === "finance");
-  const hasModule = (id: ModuleDefinition["id"]) => modules.some((m) => m.id === id);
+  const hasModule = (id: ModuleDefinition["id"]) =>
+    modules.some((m) => m.id === id);
+  const showAlmoxarifado = modules.some(
+    (m) =>
+      m.id === "stock_cleaning" ||
+      m.id === "stock_school" ||
+      m.id === "stock_pharmacy" ||
+      m.id === "stock_building",
+  );
   const branchesModule = modules.find((m) => m.id === "branches");
   const propertiesModule = modules.find((m) => m.id === "properties");
   const parkingModule = modules.find((m) => m.id === "parking");
@@ -57,19 +65,29 @@ export function Sidebar({
             branchesHref={branchesModule?.href ?? "/filiais"}
             propertiesHref={propertiesModule?.href ?? "/imoveis"}
             parkingHref={parkingModule?.href ?? "/estacionamentos"}
-            leasesHref={leasesModule?.href ?? "/locacoes"}
+            servicosHref={leasesModule?.href ?? "/servicos/catalogo"}
+            showLeaseAuxNav={!!leasesModule}
           />
         ) : null}
         <AdminNavGroup
           pathname={pathname}
           canAccessSuppliers={canAccessSuppliers}
           canManageUsers={canManageUsers}
+          showAlmoxarifado={showAlmoxarifado}
         />
         <NavLink href="/mural" active={pathname === "/mural"}>
           Mural
         </NavLink>
+        <NavLink href="/clientes" active={pathname === "/clientes" || pathname.startsWith("/clientes/")}>
+          Clientes
+        </NavLink>
         {hasModule("attendance") ? (
-          <NavLink href="/presenca" active={pathname === "/presenca" || pathname.startsWith("/presenca/")}>
+          <NavLink
+            href="/presenca"
+            active={
+              pathname === "/presenca" || pathname.startsWith("/presenca/")
+            }
+          >
             Registro de entrada/saída
           </NavLink>
         ) : null}
@@ -77,7 +95,10 @@ export function Sidebar({
       </nav>
       <div className="border-t border-line p-2">
         {sessionLabel ? (
-          <p className="mb-2 truncate px-3 text-xs text-subtle" title={sessionLabel}>
+          <p
+            className="mb-2 truncate px-3 text-xs text-subtle"
+            title={sessionLabel}
+          >
             {sessionLabel}
           </p>
         ) : null}
@@ -100,9 +121,7 @@ function NavLink({
     <Link
       href={href}
       className={`rounded-lg px-3 py-2 text-sm transition-colors ${
-        active
-          ? "bg-accent text-on-accent"
-          : "text-ink hover:bg-elevated-2"
+        active ? "bg-accent text-on-accent" : "text-ink hover:bg-elevated-2"
       }`}
     >
       {children}
@@ -121,29 +140,24 @@ function FinanceNavGroup({
   pathname: string;
   canManageUsers: boolean;
 }) {
-  const recebimentoHref = `${baseHref}/recebimento`;
-  const pagamentosPaisHref = `${baseHref}/pagamentos-pais`;
-  const pixImpressoHref = `${baseHref}/pix-impresso`;
-  const lancamentosLoteHref = `${baseHref}/lancamentos-lote`;
+  const entradasHref = `${baseHref}/entradas`;
+  const saidasHref = `${baseHref}/saidas`;
   const configuracaoEmpresaHref = `${baseHref}/configuracao-empresa`;
-  const isUnderFinance = pathname === baseHref || pathname.startsWith(`${baseHref}/`);
+  const isUnderFinance =
+    pathname === baseHref || pathname.startsWith(`${baseHref}/`);
   const isOverview = pathname === baseHref;
-  const isRecebimento = pathname === recebimentoHref || pathname.startsWith(`${recebimentoHref}/`);
-  const isPagamentosPais =
-    pathname === pagamentosPaisHref || pathname.startsWith(`${pagamentosPaisHref}/`);
-  const isPixImpresso = pathname === pixImpressoHref || pathname.startsWith(`${pixImpressoHref}/`);
-  const isLancamentosLote =
-    pathname === lancamentosLoteHref || pathname.startsWith(`${lancamentosLoteHref}/`);
+  const isEntradas =
+    pathname === entradasHref || pathname.startsWith(`${entradasHref}/`);
+  const isSaidas = pathname === saidasHref || pathname.startsWith(`${saidasHref}/`);
   const isConfiguracaoEmpresa =
-    pathname === configuracaoEmpresaHref || pathname.startsWith(`${configuracaoEmpresaHref}/`);
+    pathname === configuracaoEmpresaHref ||
+    pathname.startsWith(`${configuracaoEmpresaHref}/`);
 
   /** Abre por padrão quando já estamos em uma página do Financeiro (mas pode recolher manualmente). */
   const [open, setOpen] = useState(
     isUnderFinance ||
-      isRecebimento ||
-      isPagamentosPais ||
-      isPixImpresso ||
-      isLancamentosLote ||
+      isEntradas ||
+      isSaidas ||
       (canManageUsers && isConfiguracaoEmpresa),
   );
   const showSubmenu = open;
@@ -200,46 +214,26 @@ function FinanceNavGroup({
         >
           <li>
             <Link
-              href={recebimentoHref}
+              href={entradasHref}
               className={`block rounded-md px-2 py-1.5 text-xs leading-snug transition-colors ${
-                isRecebimento
+                isEntradas
                   ? "bg-accent text-on-accent"
                   : "text-muted hover:bg-elevated-2 hover:text-ink"
               }`}
             >
-              Recebimento de mensalidades
+              Entradas
             </Link>
           </li>
           <li>
             <Link
-              href={pagamentosPaisHref}
+              href={saidasHref}
               className={`block rounded-md px-2 py-1.5 text-xs leading-snug transition-colors ${
-                isPagamentosPais
+                isSaidas
                   ? "bg-accent text-on-accent"
                   : "text-muted hover:bg-elevated-2 hover:text-ink"
               }`}
             >
-              Pagamentos (pais e responsáveis)
-            </Link>
-          </li>
-          <li>
-            <Link
-              href={pixImpressoHref}
-              className={`block rounded-md px-2 py-1.5 text-xs leading-snug transition-colors ${
-                isPixImpresso ? "bg-accent text-on-accent" : "text-muted hover:bg-elevated-2 hover:text-ink"
-              }`}
-            >
-              PIX — impresso (QR + código)
-            </Link>
-          </li>
-          <li>
-            <Link
-              href={lancamentosLoteHref}
-              className={`block rounded-md px-2 py-1.5 text-xs leading-snug transition-colors ${
-                isLancamentosLote ? "bg-accent text-on-accent" : "text-muted hover:bg-elevated-2 hover:text-ink"
-              }`}
-            >
-              Lançamentos em lote (pagamentos)
+              Saídas
             </Link>
           </li>
           {canManageUsers ? (
@@ -266,43 +260,54 @@ function AdminNavGroup({
   pathname,
   canAccessSuppliers,
   canManageUsers,
+  showAlmoxarifado,
 }: {
   pathname: string;
   canAccessSuppliers: boolean;
   canManageUsers: boolean;
+  showAlmoxarifado: boolean;
 }) {
   const baseHref = "/administracao";
   const funcionariosHref = "/funcionarios/novo";
   const fornecedoresHref = "/fornecedores";
-  const estoqueLimpezaHref = "/estoque/limpeza";
-  const estoqueEscolarHref = "/estoque/escolar";
-  const estoqueFarmaciaHref = "/estoque/farmacia";
-  const estoqueZeladoriaHref = "/estoque/zeladoria";
+  const almoxarifadoHref = "/estoque/almoxarifado";
   const usuariosHref = "/usuarios";
   const funcoesCategoriasHref = "/administracao/funcoes-e-categorias";
 
-  const isUnderAdmin = pathname === baseHref || pathname.startsWith(`${baseHref}/`);
+  const isUnderAdmin =
+    pathname === baseHref || pathname.startsWith(`${baseHref}/`);
   const isOverview = pathname === baseHref;
-  const isFuncionarios = pathname === funcionariosHref || pathname.startsWith(`${funcionariosHref}/`);
-  const isFornecedores = pathname === fornecedoresHref || pathname.startsWith(`${fornecedoresHref}/`);
-  const isEstoqueLimpeza = pathname === estoqueLimpezaHref || pathname.startsWith(`${estoqueLimpezaHref}/`);
-  const isEstoqueEscolar = pathname === estoqueEscolarHref || pathname.startsWith(`${estoqueEscolarHref}/`);
-  const isFarmacia = pathname === estoqueFarmaciaHref || pathname.startsWith(`${estoqueFarmaciaHref}/`);
-  const isZeladoria = pathname === estoqueZeladoriaHref || pathname.startsWith(`${estoqueZeladoriaHref}/`);
+  const isFuncionarios =
+    pathname === funcionariosHref ||
+    pathname.startsWith(`${funcionariosHref}/`);
+  const isFornecedores =
+    pathname === fornecedoresHref ||
+    pathname.startsWith(`${fornecedoresHref}/`);
+  const isAlmoxarifado =
+    pathname === almoxarifadoHref ||
+    pathname.startsWith(`${almoxarifadoHref}/`) ||
+    pathname === "/estoque/limpeza" ||
+    pathname.startsWith("/estoque/limpeza/") ||
+    pathname === "/estoque/escolar" ||
+    pathname.startsWith("/estoque/escolar/") ||
+    pathname === "/estoque/farmacia" ||
+    pathname.startsWith("/estoque/farmacia/") ||
+    pathname === "/estoque/zeladoria" ||
+    pathname.startsWith("/estoque/zeladoria/");
   const isUsuarios =
-    pathname === usuariosHref || (pathname.startsWith(`${usuariosHref}/`) && !pathname.startsWith("/usuarios/atividade"));
+    pathname === usuariosHref ||
+    (pathname.startsWith(`${usuariosHref}/`) &&
+      !pathname.startsWith("/usuarios/atividade"));
   const isFuncoesCategorias =
-    pathname === funcoesCategoriasHref || pathname.startsWith(`${funcoesCategoriasHref}/`);
+    pathname === funcoesCategoriasHref ||
+    pathname.startsWith(`${funcoesCategoriasHref}/`);
 
   /** Abre por padrão quando já estamos em uma página do grupo (mas pode recolher manualmente). */
   const [open, setOpen] = useState(
     isUnderAdmin ||
       isFuncionarios ||
       (canAccessSuppliers && isFornecedores) ||
-      isEstoqueLimpeza ||
-      isEstoqueEscolar ||
-      isFarmacia ||
-      isZeladoria ||
+      isAlmoxarifado ||
       (canManageUsers && isUsuarios) ||
       (canManageUsers && isFuncoesCategorias),
   );
@@ -363,7 +368,9 @@ function AdminNavGroup({
             <Link
               href={funcionariosHref}
               className={`block rounded-md px-2 py-1.5 text-xs leading-snug transition-colors ${
-                isFuncionarios ? "bg-accent text-on-accent" : "text-muted hover:bg-elevated-2 hover:text-ink"
+                isFuncionarios
+                  ? "bg-accent text-on-accent"
+                  : "text-muted hover:bg-elevated-2 hover:text-ink"
               }`}
             >
               Funcionários
@@ -374,59 +381,37 @@ function AdminNavGroup({
               <Link
                 href={fornecedoresHref}
                 className={`block rounded-md px-2 py-1.5 text-xs leading-snug transition-colors ${
-                  isFornecedores ? "bg-accent text-on-accent" : "text-muted hover:bg-elevated-2 hover:text-ink"
+                  isFornecedores
+                    ? "bg-accent text-on-accent"
+                    : "text-muted hover:bg-elevated-2 hover:text-ink"
                 }`}
               >
                 Fornecedores
               </Link>
             </li>
           ) : null}
-          <li>
-            <Link
-              href={estoqueLimpezaHref}
-              className={`block rounded-md px-2 py-1.5 text-xs leading-snug transition-colors ${
-                isEstoqueLimpeza ? "bg-accent text-on-accent" : "text-muted hover:bg-elevated-2 hover:text-ink"
-              }`}
-            >
-              Estoque — limpeza
-            </Link>
-          </li>
-          <li>
-            <Link
-              href={estoqueEscolarHref}
-              className={`block rounded-md px-2 py-1.5 text-xs leading-snug transition-colors ${
-                isEstoqueEscolar ? "bg-accent text-on-accent" : "text-muted hover:bg-elevated-2 hover:text-ink"
-              }`}
-            >
-              Estoque — materiais escolar
-            </Link>
-          </li>
-          <li>
-            <Link
-              href={estoqueFarmaciaHref}
-              className={`block rounded-md px-2 py-1.5 text-xs leading-snug transition-colors ${
-                isFarmacia ? "bg-accent text-on-accent" : "text-muted hover:bg-elevated-2 hover:text-ink"
-              }`}
-            >
-              Farmácia escolar
-            </Link>
-          </li>
-          <li>
-            <Link
-              href={estoqueZeladoriaHref}
-              className={`block rounded-md px-2 py-1.5 text-xs leading-snug transition-colors ${
-                isZeladoria ? "bg-accent text-on-accent" : "text-muted hover:bg-elevated-2 hover:text-ink"
-              }`}
-            >
-              Zeladoria do prédio
-            </Link>
-          </li>
+          {showAlmoxarifado ? (
+            <li>
+              <Link
+                href={almoxarifadoHref}
+                className={`block rounded-md px-2 py-1.5 text-xs leading-snug transition-colors ${
+                  isAlmoxarifado
+                    ? "bg-accent text-on-accent"
+                    : "text-muted hover:bg-elevated-2 hover:text-ink"
+                }`}
+              >
+                Almoxarifado
+              </Link>
+            </li>
+          ) : null}
           {canManageUsers ? (
             <li>
               <Link
                 href={funcoesCategoriasHref}
                 className={`block rounded-md px-2 py-1.5 text-xs leading-snug transition-colors ${
-                  isFuncoesCategorias ? "bg-accent text-on-accent" : "text-muted hover:bg-elevated-2 hover:text-ink"
+                  isFuncoesCategorias
+                    ? "bg-accent text-on-accent"
+                    : "text-muted hover:bg-elevated-2 hover:text-ink"
                 }`}
               >
                 Funções e categorias
@@ -438,7 +423,9 @@ function AdminNavGroup({
               <Link
                 href={usuariosHref}
                 className={`block rounded-md px-2 py-1.5 text-xs leading-snug transition-colors ${
-                  isUsuarios ? "bg-accent text-on-accent" : "text-muted hover:bg-elevated-2 hover:text-ink"
+                  isUsuarios
+                    ? "bg-accent text-on-accent"
+                    : "text-muted hover:bg-elevated-2 hover:text-ink"
                 }`}
               >
                 Usuários
@@ -456,15 +443,16 @@ function OpsNavGroup({
   branchesHref,
   propertiesHref,
   parkingHref,
-  leasesHref,
+  servicosHref,
+  showLeaseAuxNav,
 }: {
   pathname: string;
   branchesHref: string;
   propertiesHref: string;
   parkingHref: string;
-  leasesHref: string;
+  servicosHref: string;
+  showLeaseAuxNav: boolean;
 }) {
-  const tenantsHref = "/locatarios";
   const isUnder =
     pathname === branchesHref ||
     pathname.startsWith(`${branchesHref}/`) ||
@@ -472,19 +460,38 @@ function OpsNavGroup({
     pathname.startsWith(`${propertiesHref}/`) ||
     pathname === parkingHref ||
     pathname.startsWith(`${parkingHref}/`) ||
-    pathname === leasesHref ||
-    pathname.startsWith(`${leasesHref}/`) ||
-    pathname === tenantsHref ||
-    pathname.startsWith(`${tenantsHref}/`);
+    pathname === servicosHref ||
+    pathname.startsWith(`${servicosHref}/`) ||
+    pathname === "/servicos" ||
+    pathname.startsWith("/servicos/") ||
+    pathname === "/locacoes" ||
+    pathname.startsWith("/locacoes/") ||
+    pathname === "/locatarios" ||
+    pathname.startsWith("/locatarios/");
 
   const [open, setOpen] = useState(isUnder);
   const showSubmenu = open;
 
-  const isBranches = pathname === branchesHref || pathname.startsWith(`${branchesHref}/`);
-  const isProperties = pathname === propertiesHref || pathname.startsWith(`${propertiesHref}/`);
-  const isParking = pathname === parkingHref || pathname.startsWith(`${parkingHref}/`);
-  const isLeases = pathname === leasesHref || pathname.startsWith(`${leasesHref}/`);
-  const isTenants = pathname === tenantsHref || pathname.startsWith(`${tenantsHref}/`);
+  const isBranches =
+    pathname === branchesHref || pathname.startsWith(`${branchesHref}/`);
+  const isProperties =
+    pathname === propertiesHref || pathname.startsWith(`${propertiesHref}/`);
+  const isParking =
+    pathname === parkingHref || pathname.startsWith(`${parkingHref}/`);
+  const isLeaseLocacoes =
+    pathname === "/servicos/locacoes" || pathname.startsWith("/servicos/locacoes/");
+  const isLeaseLocatarios =
+    pathname === "/servicos/locatarios" || pathname.startsWith("/servicos/locatarios/");
+
+  const isServicos =
+    pathname === servicosHref ||
+    pathname.startsWith(`${servicosHref}/`) ||
+    pathname === "/servicos" ||
+    pathname.startsWith("/servicos/") ||
+    pathname === "/locacoes" ||
+    pathname.startsWith("/locacoes/") ||
+    pathname === "/locatarios" ||
+    pathname.startsWith("/locatarios/");
 
   return (
     <div className="rounded-lg">
@@ -493,7 +500,9 @@ function OpsNavGroup({
           href={branchesHref}
           title="Operações"
           className={`min-w-0 flex-1 rounded-lg px-3 py-2 text-sm transition-colors ${
-            isUnder ? "bg-elevated-2 font-medium text-accent" : "text-ink hover:bg-elevated-2"
+            isUnder
+              ? "bg-elevated-2 font-medium text-accent"
+              : "text-ink hover:bg-elevated-2"
           }`}
         >
           Operações
@@ -505,7 +514,9 @@ function OpsNavGroup({
           title={open ? "Recolher submenu" : "Expandir submenu"}
           onClick={() => setOpen((v) => !v)}
           className={`flex w-9 shrink-0 items-center justify-center rounded-lg transition-colors ${
-            isUnder ? "bg-elevated-2 text-accent hover:bg-line-soft" : "text-muted hover:bg-elevated-2 hover:text-ink"
+            isUnder
+              ? "bg-elevated-2 text-accent hover:bg-line-soft"
+              : "text-muted hover:bg-elevated-2 hover:text-ink"
           }`}
         >
           <svg
@@ -533,7 +544,9 @@ function OpsNavGroup({
             <Link
               href={branchesHref}
               className={`block rounded-md px-2 py-1.5 text-xs leading-snug transition-colors ${
-                isBranches ? "bg-accent text-on-accent" : "text-muted hover:bg-elevated-2 hover:text-ink"
+                isBranches
+                  ? "bg-accent text-on-accent"
+                  : "text-muted hover:bg-elevated-2 hover:text-ink"
               }`}
             >
               Filiais
@@ -543,7 +556,9 @@ function OpsNavGroup({
             <Link
               href={propertiesHref}
               className={`block rounded-md px-2 py-1.5 text-xs leading-snug transition-colors ${
-                isProperties ? "bg-accent text-on-accent" : "text-muted hover:bg-elevated-2 hover:text-ink"
+                isProperties
+                  ? "bg-accent text-on-accent"
+                  : "text-muted hover:bg-elevated-2 hover:text-ink"
               }`}
             >
               Imóveis
@@ -551,32 +566,26 @@ function OpsNavGroup({
           </li>
           <li>
             <Link
-              href={leasesHref}
-              className={`block rounded-md px-2 py-1.5 text-xs leading-snug transition-colors ${
-                isLeases ? "bg-accent text-on-accent" : "text-muted hover:bg-elevated-2 hover:text-ink"
-              }`}
-            >
-              Locações
-            </Link>
-          </li>
-          <li>
-            <Link
-              href={tenantsHref}
-              className={`block rounded-md px-2 py-1.5 text-xs leading-snug transition-colors ${
-                isTenants ? "bg-accent text-on-accent" : "text-muted hover:bg-elevated-2 hover:text-ink"
-              }`}
-            >
-              Locatários
-            </Link>
-          </li>
-          <li>
-            <Link
               href={parkingHref}
               className={`block rounded-md px-2 py-1.5 text-xs leading-snug transition-colors ${
-                isParking ? "bg-accent text-on-accent" : "text-muted hover:bg-elevated-2 hover:text-ink"
+                isParking
+                  ? "bg-accent text-on-accent"
+                  : "text-muted hover:bg-elevated-2 hover:text-ink"
               }`}
             >
               Estacionamentos
+            </Link>
+          </li>
+          <li>
+            <Link
+              href={servicosHref}
+              className={`block rounded-md px-2 py-1.5 text-xs leading-snug transition-colors ${
+                isServicos && !isLeaseLocacoes && !isLeaseLocatarios
+                  ? "bg-accent text-on-accent"
+                  : "text-muted hover:bg-elevated-2 hover:text-ink"
+              }`}
+            >
+              Serviços
             </Link>
           </li>
         </ul>
@@ -590,13 +599,18 @@ function SecurityNavGroup({ pathname }: { pathname: string }) {
   const atividadesHref = "/usuarios/atividade";
   const camerasHref = "/cameras";
 
-  const isUnderSecurity = pathname === baseHref || pathname.startsWith(`${baseHref}/`);
+  const isUnderSecurity =
+    pathname === baseHref || pathname.startsWith(`${baseHref}/`);
   const isOverview = pathname === baseHref;
-  const isAtividades = pathname === atividadesHref || pathname.startsWith(`${atividadesHref}/`);
-  const isCameras = pathname === camerasHref || pathname.startsWith(`${camerasHref}/`);
+  const isAtividades =
+    pathname === atividadesHref || pathname.startsWith(`${atividadesHref}/`);
+  const isCameras =
+    pathname === camerasHref || pathname.startsWith(`${camerasHref}/`);
 
   /** Abre por padrão quando já estamos em uma página do grupo (mas pode recolher manualmente). */
-  const [open, setOpen] = useState(isUnderSecurity || isAtividades || isCameras);
+  const [open, setOpen] = useState(
+    isUnderSecurity || isAtividades || isCameras,
+  );
   const showSubmenu = open;
 
   return (
@@ -654,7 +668,9 @@ function SecurityNavGroup({ pathname }: { pathname: string }) {
             <Link
               href={atividadesHref}
               className={`block rounded-md px-2 py-1.5 text-xs leading-snug transition-colors ${
-                isAtividades ? "bg-accent text-on-accent" : "text-muted hover:bg-elevated-2 hover:text-ink"
+                isAtividades
+                  ? "bg-accent text-on-accent"
+                  : "text-muted hover:bg-elevated-2 hover:text-ink"
               }`}
             >
               Atividades
@@ -664,7 +680,9 @@ function SecurityNavGroup({ pathname }: { pathname: string }) {
             <Link
               href={camerasHref}
               className={`block rounded-md px-2 py-1.5 text-xs leading-snug transition-colors ${
-                isCameras ? "bg-accent text-on-accent" : "text-muted hover:bg-elevated-2 hover:text-ink"
+                isCameras
+                  ? "bg-accent text-on-accent"
+                  : "text-muted hover:bg-elevated-2 hover:text-ink"
               }`}
             >
               Câmeras de segurança

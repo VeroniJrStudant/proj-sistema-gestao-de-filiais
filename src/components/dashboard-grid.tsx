@@ -69,7 +69,7 @@ export function DashboardGrid({ data }: { data: DashboardSnapshot }) {
           </p>
         </Card>
 
-        <Card title="Zeladoria" href="/estoque/zeladoria" moduleId="stock_building">
+        <Card title="Zeladoria" href="/estoque/almoxarifado?aba=zeladoria" moduleId="stock_building">
           <p>
             <strong className="text-ink">{data.stock.byCategory.BUILDING_MAINTENANCE ?? 0}</strong>{" "}
             itens
@@ -80,7 +80,7 @@ export function DashboardGrid({ data }: { data: DashboardSnapshot }) {
           </p>
         </Card>
 
-        <Card title="Estoque — limpeza" href="/estoque/limpeza" moduleId="stock_cleaning">
+        <Card title="Estoque — limpeza" href="/estoque/almoxarifado?aba=limpeza" moduleId="stock_cleaning">
           <p>
             <strong className="text-ink">{data.stock.byCategory.CLEANING ?? 0}</strong> itens
           </p>
@@ -90,7 +90,7 @@ export function DashboardGrid({ data }: { data: DashboardSnapshot }) {
           </p>
         </Card>
 
-        <Card title="Materiais escolares" href="/estoque/escolar" moduleId="stock_school">
+        <Card title="Materiais escolares" href="/estoque/almoxarifado?aba=escolar" moduleId="stock_school">
           <p>
             <strong className="text-ink">{data.stock.byCategory.SCHOOL_SUPPLIES ?? 0}</strong> itens
           </p>
@@ -100,7 +100,7 @@ export function DashboardGrid({ data }: { data: DashboardSnapshot }) {
           </p>
         </Card>
 
-        <Card title="Farmácia escolar" href="/estoque/farmacia" moduleId="stock_pharmacy">
+        <Card title="Farmácia escolar" href="/estoque/almoxarifado?aba=farmacia" moduleId="stock_pharmacy">
           <p>
             <strong className="text-ink">{data.stock.byCategory.PHARMACY ?? 0}</strong> itens
           </p>

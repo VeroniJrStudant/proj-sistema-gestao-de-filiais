@@ -14,11 +14,11 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "CrecheGestão — Administração modular",
-  description: "Gestão de turmas, presença, estoques, segurança e financeiro para creches.",
+  title: "Sistema de Gestão",
+  description: "Gestão de bens, presença, estoques, segurança e financeiro de bens.",
 };
 
-const themeInitScript = `(function(){try{var k='creche-theme';var s=localStorage.getItem(k);var d=document.documentElement;if(s==='dark'){d.classList.add('dark');}else if(s==='light'){d.classList.remove('dark');}else{if(window.matchMedia('(prefers-color-scheme: dark)').matches){d.classList.add('dark');}else{d.classList.remove('dark');}}}catch(e){}})();`;
+const themeInitScript = `(function(){try{var k='creche-theme';var s=localStorage.getItem(k);var d=document.documentElement;if(s==='dark'){d.classList.add('dark');}else if(s==='light'){d.classList.remove('dark');}else{if(window.matchMedia('(prefers-color-scheme: dark)').matches){d.classList.add('dark');}else{d.classList.remove('dark');}}if(d.classList.contains('dark')){d.removeAttribute('data-palette');try{localStorage.removeItem('creche-palette');}catch(e){}}else{d.setAttribute('data-palette','park');try{localStorage.setItem('creche-palette','park');}catch(e){}}}catch(e){}})();`;
 
 export default function RootLayout({
   children,

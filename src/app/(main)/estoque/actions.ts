@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { InventoryCategory, Prisma } from "@/generated/prisma/client";
 import { parseBrlStringToCents } from "@/lib/brl-parse";
 import { INVENTORY_CATEGORY_TO_REGISTRY_SCOPE } from "@/lib/inventory-registry-scope";
-import { INVENTORY_STOCK_META } from "@/lib/inventory-stock-meta";
+import { INVENTORY_STOCK_META, inventoryStockListRevalidatePath } from "@/lib/inventory-stock-meta";
 import { prisma } from "@/lib/prisma";
 import { saveInventoryItemPhoto } from "@/lib/save-inventory-photo";
 
@@ -63,7 +63,7 @@ export async function createInventoryItem(
   if (!category) {
     return { ok: false, error: "Categoria de estoque inválida." };
   }
-  const { path: revalidatePathStr, skuPrefix } = INVENTORY_STOCK_META[category];
+  const { skuPrefix } = INVENTORY_STOCK_META[category];
 
   const name = String(formData.get("name") ?? "").trim();
   if (!name) {
@@ -162,6 +162,6 @@ export async function createInventoryItem(
     }
   }
 
-  revalidatePath(revalidatePathStr);
+  revalidatePath(inventoryStockListRevalidatePath());
   return { ok: true };
 }

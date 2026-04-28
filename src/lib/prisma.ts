@@ -74,6 +74,7 @@ function clientMatchesGeneratedSchema(client: PrismaClient | undefined): boolean
     accessSession?: { findMany?: unknown };
     accessPricingPlan?: { findMany?: unknown };
     accessPaymentPart?: { findMany?: unknown };
+    customer?: { findMany?: unknown };
   };
   return (
     !!client &&
@@ -88,7 +89,8 @@ function clientMatchesGeneratedSchema(client: PrismaClient | undefined): boolean
     typeof c.parkingFacility?.findMany === "function" &&
     typeof c.accessSession?.findMany === "function" &&
     typeof c.accessPricingPlan?.findMany === "function" &&
-    typeof c.accessPaymentPart?.findMany === "function"
+    typeof c.accessPaymentPart?.findMany === "function" &&
+    typeof c.customer?.findMany === "function"
   );
 }
 

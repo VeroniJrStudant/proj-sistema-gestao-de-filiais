@@ -51,6 +51,51 @@
   --foreground: var(--ink);
 }
 
+/*
+ * Paleta “Cachoeira Park”: referência ao site cachoeirapark.com.br — azul confiança / sinalização,
+ * neutros frios (Florianópolis, estacionamento). Ativa com html[data-palette="park"] (ver theme-toggle + layout).
+ */
+html[data-palette="park"]:not(.dark) {
+  --shell: #e5edf5;
+  --panel: #d8e4f0;
+  --elevated: #eef4fb;
+  --elevated-2: #f8fbfe;
+
+  --ink: #13202c;
+  --muted: #3d5a73;
+  --subtle: #5a758c;
+
+  --line: #b8cadb;
+  --line-soft: #dce8f2;
+
+  --accent: #1a5f7a;
+  --accent-hover: #154d63;
+  --on-accent: #ffffff;
+  --accent-soft: #d4e8f2;
+  --accent-border: #6fa3bc;
+  --accent-muted: #2a7a9a;
+
+  --caution: #a16207;
+  --caution-soft: #fdf6eb;
+  --caution-border: #e5d9c4;
+
+  --success-bg: #dff0e8;
+  --success-fg: #0f3d2a;
+  --success-border: #9cc9b3;
+
+  --warn-bg: #faf6ef;
+  --warn-border: #e3d5bc;
+  --warn-text: #4a3d24;
+  --warn-muted: #6f6244;
+
+  --danger-bg: #fceeef;
+  --danger-border: #e8c9cd;
+  --danger-text: #6b2a30;
+
+  --background: var(--shell);
+  --foreground: var(--ink);
+}
+
 html.dark {
   --shell: #12151c;
   --panel: #191e27;
@@ -76,6 +121,47 @@ html.dark {
   --caution-border: #453a28;
 
   --success-bg: #152a22;
+  --success-fg: #8ed9ae;
+  --success-border: #2d4a3d;
+
+  --warn-bg: #221e18;
+  --warn-border: #3a3228;
+  --warn-text: #f2e8d4;
+  --warn-muted: #c4b596;
+
+  --danger-bg: #2a1f22;
+  --danger-border: #4a3438;
+  --danger-text: #f0d4d8;
+
+  --background: var(--shell);
+  --foreground: var(--ink);
+}
+
+html.dark[data-palette="park"] {
+  --shell: #0c1016;
+  --panel: #121922;
+  --elevated: #161e28;
+  --elevated-2: #1b2430;
+
+  --ink: #e8eef5;
+  --muted: #94a8bc;
+  --subtle: #7a8fa6;
+
+  --line: #2a3544;
+  --line-soft: #222b38;
+
+  --accent: #4a9ec4;
+  --accent-hover: #6ab8db;
+  --on-accent: #061018;
+  --accent-soft: #152a38;
+  --accent-border: #3d6d88;
+  --accent-muted: #7ec4e8;
+
+  --caution: #fbbf77;
+  --caution-soft: #2a2319;
+  --caution-border: #453a28;
+
+  --success-bg: #142820;
   --success-fg: #8ed9ae;
   --success-border: #2d4a3d;
 

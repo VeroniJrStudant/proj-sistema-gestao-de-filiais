@@ -10,7 +10,7 @@ export const PERMISSION_REGISTRY = [
     label: "Registro de entrada/saída",
     description: "Controle de acesso e cobrança para imóveis e estacionamentos.",
   },
-  { id: "stock.access", label: "Estoques", description: "Módulos de estoque e farmácia escolar." },
+  { id: "stock.access", label: "Almoxarifado", description: "Estoque por setor (limpeza, escolar, farmácia, zeladoria)." },
   { id: "suppliers.access", label: "Fornecedores", description: "Cadastro e consulta de fornecedores." },
   { id: "cameras.access", label: "Câmeras", description: "Pontos e links de visualização." },
   { id: "finance.access", label: "Financeiro", description: "Mensalidades, pagamentos e extratos." },

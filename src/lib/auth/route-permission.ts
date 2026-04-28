@@ -26,6 +26,9 @@ export function permissionForPath(pathname: string): PermissionId | null {
   if (pathname.startsWith("/financeiro")) {
     return "finance.access";
   }
+  if (pathname.startsWith("/clientes")) {
+    return "finance.access";
+  }
   if (pathname.startsWith("/usuarios")) {
     return "users.manage";
   }

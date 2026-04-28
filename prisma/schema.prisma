@@ -66,6 +66,36 @@ enum AccessSessionStatus {
   CANCELLED
 }
 
+enum CustomerBillingProfile {
+  MONTHLY
+  DAILY
+  AVULSO
+  TENANT
+  OTHER
+}
+
+enum CustomerKind {
+  PERSON
+  COMPANY
+}
+
+enum CustomerDocumentType {
+  CPF
+  CNPJ
+  OTHER
+}
+
+/**
+ * Vínculo do cliente a um cadastro do menu Operações (filial, imóvel ou estacionamento).
+ * `NONE` = sem vínculo específico (uso geral).
+ */
+enum CustomerOperationLinkKind {
+  NONE
+  BRANCH
+  PROPERTY
+  PARKING_FACILITY
+}
+
 /** Escopo da categoria cadastrável (funcionário, fornecedor ou estoque por módulo). */
 enum CategoryScope {
   EMPLOYEE
@@ -490,6 +520,63 @@ model Supplier {
   @@index([supplierCategoryId])
 }
 
+/** Cliente global (pode ser usado em qualquer filial/imóvel/estacionamento). */
+model Customer {
+  id        String   @id @default(cuid())
+  /** Tipo de vínculo com cadastro de Operações (filial, imóvel, etc.). */
+  operationLinkKind CustomerOperationLinkKind @default(NONE)
+  /** Quando `operationLinkKind` = BRANCH. */
+  branchId  String?
+  branch    Branch?  @relation(fields: [branchId], references: [id], onDelete: SetNull)
+  /** Quando `operationLinkKind` = PROPERTY. */
+  propertyId String?
+  property   Property? @relation(fields: [propertyId], references: [id], onDelete: SetNull)
+  /** Quando `operationLinkKind` = PARKING_FACILITY. */
+  parkingFacilityId String?
+  parkingFacility   ParkingFacility? @relation(fields: [parkingFacilityId], references: [id], onDelete: SetNull)
+  kind      CustomerKind @default(PERSON)
+  /** Nome/Razão social. */
+  name      String
+  /** Nome fantasia/apelido. */
+  tradeName String?
+  documentType CustomerDocumentType @default(OTHER)
+  /** CPF/CNPJ/documento (texto livre). */
+  document  String?
+  phone     String?
+  email     String?
+  /** Endereço de cobrança (opcional; útil para boleto e cadastro). */
+  street       String?
+  number       String?
+  complement   String?
+  neighborhood String?
+  city         String?
+  state        String?
+  zip          String?
+
+  billingProfile CustomerBillingProfile @default(AVULSO)
+  /** Dia preferencial de vencimento (1–31) quando mensalista/locatário (opcional). */
+  preferredDueDay Int?
+  /** Valor sugerido (centavos BRL) quando fizer sentido (mensalista/diária). */
+  suggestedAmountCents Int?
+  /** Forma(s) preferidas (JSON array de códigos; ex.: [\"PIX\",\"DINHEIRO\"]). */
+  preferredPaymentMethodsJson String? @default("[]")
+
+  notes     String?
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  accessSessions AccessSession[]
+
+  @@index([name])
+  @@index([document])
+  @@index([billingProfile])
+  @@index([branchId])
+  @@index([operationLinkKind])
+  @@index([propertyId])
+  @@index([parkingFacilityId])
+}
+
 model FinancialRecord {
   id          String             @id @default(cuid())
   direction   FinancialDirection
@@ -543,6 +630,7 @@ model AccessSession {
   customerName     String?
   customerDocument String?
   phone            String?
+  customerId       String?
   entryAt          DateTime           @default(now())
   exitAt           DateTime?
   /** Valor final cobrado (centavos BRL). */
@@ -556,6 +644,7 @@ model AccessSession {
   branch           Branch?            @relation(fields: [branchId], references: [id], onDelete: SetNull)
   property         Property?          @relation(fields: [propertyId], references: [id], onDelete: SetNull)
   parkingFacility  ParkingFacility?   @relation(fields: [parkingFacilityId], references: [id], onDelete: SetNull)
+  customer         Customer?          @relation(fields: [customerId], references: [id], onDelete: SetNull)
   payments         AccessPaymentPart[]
   financialRecords FinancialRecord[]
   pricingPlanId    String?
@@ -568,6 +657,7 @@ model AccessSession {
   @@index([propertyId])
   @@index([parkingFacilityId])
   @@index([plate])
+  @@index([customerId])
   @@index([pricingPlanId])
   @@map("AccessRecord")
 }
@@ -649,6 +739,7 @@ model Branch {
   financialRecords FinancialRecord[]
   accessSessions AccessSession[]
   accessPricingPlans AccessPricingPlan[]
+  customers Customer[]
 
   @@index([name])
 }
@@ -696,6 +787,7 @@ model Property {
   financialRecords FinancialRecord[]
   accessSessions AccessSession[]
   accessPricingPlans AccessPricingPlan[]
+  customers Customer[]
 
   @@index([branchId])
   @@index([name])
@@ -756,6 +848,44 @@ model LeaseContract {
   @@index([status])
 }
 
+/** Tipo ou nome de serviço reutilizável (catálogo para particulares). */
+model ServiceCatalog {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  particulars ParticularService[]
+
+  @@index([name])
+  @@index([active])
+}
+
+/** Serviço ou acordo informal (particular), fora do contrato formal de imóvel. */
+model ParticularService {
+  id        String   @id @default(cuid())
+  title     String
+  serviceCatalogId String?
+  serviceCatalog   ServiceCatalog? @relation(fields: [serviceCatalogId], references: [id], onDelete: SetNull)
+  partyName String?
+  document  String?
+  phone     String?
+  email     String?
+  /** Valor mensal de referência (centavos BRL), opcional. */
+  monthlyAmountCents Int?
+  startsAt  DateTime?
+  endsAt    DateTime?
+  notes     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([title])
+  @@index([updatedAt])
+  @@index([serviceCatalogId])
+}
+
 enum ParkingFacilityStatus {
   ACTIVE
   MAINTENANCE
@@ -780,6 +910,7 @@ model ParkingFacility {
   financialRecords FinancialRecord[]
   accessSessions AccessSession[]
   accessPricingPlans AccessPricingPlan[]
+  customers Customer[]
 
   @@index([branchId])
   @@index([name])

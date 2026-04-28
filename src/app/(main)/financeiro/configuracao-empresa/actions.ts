@@ -113,6 +113,7 @@ export async function saveCompanySettings(
     revalidatePath("/financeiro");
     revalidatePath("/financeiro/configuracao-empresa");
     revalidatePath("/financeiro/pix-impresso");
+    revalidatePath("/financeiro/entradas/pix-impresso");
     return { ok: true };
   } catch {
     return { ok: false, error: "Não foi possível salvar. Tente novamente." };

@@ -218,6 +218,8 @@ export async function registerDirectCheckoutRequest(
 
   revalidatePath("/financeiro");
   revalidatePath("/financeiro/pagamentos-pais");
+  revalidatePath("/financeiro/entradas");
+  revalidatePath("/financeiro/entradas/pagamentos-pais");
   revalidatePath("/financeiro/direta");
   revalidatePath(`/financeiro/documento-debito/${created.id}`);
   revalidatePath("/");
