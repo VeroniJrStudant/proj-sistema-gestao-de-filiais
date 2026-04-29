@@ -48,7 +48,7 @@ export default function AdministracaoPage() {
         <Card title="Fornecedores" description="Cadastro e edição de fornecedores (código, pagamento, endereço)." href="/fornecedores" />
         <Card
           title="Almoxarifado"
-          description="Limpeza, material escolar, farmácia escolar e zeladoria — um único painel com abas por setor."
+          description="Limpeza, material de escritório e zeladoria — um único painel com abas por setor."
           href="/estoque/almoxarifado"
         />
         <Card title="Usuários" description="Perfis de acesso, permissões e gerenciamento de contas." href="/usuarios" />

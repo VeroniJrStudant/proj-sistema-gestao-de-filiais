@@ -1,6 +1,6 @@
 /**
  * Dados pseudoaleatórios para `prisma/seed.ts` — alunos, responsáveis, funcionários,
- * fornecedores e itens de estoque (limpeza, escolar, farmácia, zeladoria).
+ * fornecedores e itens de estoque (limpeza, material de escritório, farmácia, zeladoria).
  */
 
 import type { Prisma } from "@/generated/prisma/client";
@@ -414,22 +414,11 @@ const SCHOOL_ITEMS: readonly InvDef[] = [
   { name: "Papel sulfite A4 500 fls", productCategory: "Papelaria", brand: "Chamex", unit: "pct" },
   { name: "Caneta esferográfica azul caixa 50", productCategory: "Papelaria", brand: "Bic", unit: "cx" },
   { name: "Lápis de cor 24 cores", productCategory: "Didático", brand: "Faber", unit: "cx" },
-  { name: "Cola branca escolar 1 kg", productCategory: "Papelaria", brand: "Tenaz", unit: "fr" },
+  { name: "Cola branca 1 kg", productCategory: "Papelaria", brand: "Tenaz", unit: "fr" },
   { name: "Tesoura infantil sem ponta", productCategory: "Papelaria", brand: "Maped", unit: "UN" },
   { name: "Tintas guache 12 cores", productCategory: "Didático", brand: "Acrilex", unit: "cx" },
   { name: "Giz de cera grosso", productCategory: "Didático", brand: "Acrilex", unit: "cx" },
   { name: "Plasticina educativa 500 g", productCategory: "Didático", brand: "Soft", unit: "pct" },
-] as const;
-
-const PHARMACY_ITEMS: readonly InvDef[] = [
-  { name: "Soro fisiológico 0,9% 10 ml", productCategory: "Medicamentos", brand: "Equiplex", unit: "fr" },
-  { name: "Atadura crepe 10 cm", productCategory: "Curativos", brand: "Cremer", unit: "UN" },
-  { name: "Álcool gel 70% 500 ml", productCategory: "Higiene", brand: "Medi", unit: "fr" },
-  { name: "Luvas procedimento M", productCategory: "EPI", brand: "Descarpack", unit: "cx" },
-  { name: "Termômetro digital", productCategory: "Instrumentos", brand: "G-Tech", unit: "UN" },
-  { name: "Band-aid hipoalergênico", productCategory: "Curativos", brand: "Band", unit: "cx" },
-  { name: "Seringa descartável 5 ml", productCategory: "Insumos", brand: "Descarpack", unit: "pct" },
-  { name: "Gaze esterilizada", productCategory: "Curativos", brand: "Cremer", unit: "pct" },
 ] as const;
 
 const BUILDING_ITEMS: readonly InvDef[] = [
@@ -464,14 +453,14 @@ function inventoryRow(
       "Depósito — subsolo",
       "Almoxarifado — térreo",
       "Sala de materiais — 2º andar",
-      "Farmácia escolar — copa",
+      "Copa — armário",
     ]),
     imageUrl: `https://picsum.photos/seed/${encodeURIComponent(sku)}/96/96`,
     unitPriceCents: randInt(90, 42000),
   };
 }
 
-/** Itens de estoque para as 4 categorias (limpeza, escolar, farmácia, zeladoria). */
+/** Itens de estoque para as 3 categorias ativas (limpeza, material de escritório, zeladoria). */
 export function buildInventoryItemsForSeed(year: number): Prisma.InventoryItemCreateManyInput[] {
   const out: Prisma.InventoryItemCreateManyInput[] = [];
   let n = 1;
@@ -481,10 +470,6 @@ export function buildInventoryItemsForSeed(year: number): Prisma.InventoryItemCr
   n = 1;
   for (const def of SCHOOL_ITEMS) {
     out.push(inventoryRow(InventoryCategory.SCHOOL_SUPPLIES, "M", year, n++, def));
-  }
-  n = 1;
-  for (const def of PHARMACY_ITEMS) {
-    out.push(inventoryRow(InventoryCategory.PHARMACY, "F", year, n++, def));
   }
   n = 1;
   for (const def of BUILDING_ITEMS) {

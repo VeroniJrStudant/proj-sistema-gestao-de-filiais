@@ -1,8 +1,8 @@
-import type { InventoryCategory } from "@/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
 import { INVENTORY_CATEGORY_TO_REGISTRY_SCOPE } from "@/lib/inventory-registry-scope";
+import type { ManagedInventoryCategory } from "@/lib/inventory-stock-meta";
 
-export async function fetchInventoryItemsByCategory(category: InventoryCategory) {
+export async function fetchInventoryItemsByCategory(category: ManagedInventoryCategory) {
   const rows = await prisma.inventoryItem.findMany({
     where: { category },
     orderBy: { name: "asc" },
@@ -28,7 +28,7 @@ export async function fetchInventoryItemsByCategory(category: InventoryCategory)
   }));
 }
 
-export async function fetchStockRegistryCategoryOptions(category: InventoryCategory) {
+export async function fetchStockRegistryCategoryOptions(category: ManagedInventoryCategory) {
   const scope = INVENTORY_CATEGORY_TO_REGISTRY_SCOPE[category];
   return prisma.registryCategory.findMany({
     where: { active: true, scope },

@@ -3,17 +3,19 @@ import type { InventoryCategory } from "@/generated/prisma/client";
 /** Lista única de estoque (abas por setor). */
 export const ALMOXARIFADO_LIST_PATH = "/estoque/almoxarifado";
 
+/** Categorias de estoque com aba e fluxo ativos na aplicação (exclui legado sem UI). */
+export type ManagedInventoryCategory = Exclude<InventoryCategory, "PHARMACY">;
+
 export const INVENTORY_STOCK_META: Record<
-  InventoryCategory,
+  ManagedInventoryCategory,
   { skuPrefix: string; almoxSlug: string }
 > = {
   CLEANING: { skuPrefix: "L", almoxSlug: "limpeza" },
   SCHOOL_SUPPLIES: { skuPrefix: "M", almoxSlug: "escolar" },
-  PHARMACY: { skuPrefix: "F", almoxSlug: "farmacia" },
   BUILDING_MAINTENANCE: { skuPrefix: "Z", almoxSlug: "zeladoria" },
 };
 
-export function inventoryCategoryListHref(category: InventoryCategory): string {
+export function inventoryCategoryListHref(category: ManagedInventoryCategory): string {
   const { almoxSlug } = INVENTORY_STOCK_META[category];
   return `${ALMOXARIFADO_LIST_PATH}?aba=${encodeURIComponent(almoxSlug)}`;
 }

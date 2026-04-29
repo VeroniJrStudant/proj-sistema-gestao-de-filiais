@@ -1,6 +1,6 @@
 "use client";
 
-import type { InventoryCategory } from "@/generated/prisma/client";
+import type { ManagedInventoryCategory } from "@/lib/inventory-stock-meta";
 import { cadastroEdicaoToggleBtnClass } from "@/components/cadastro-edicao-collapsible";
 import { ExportExcelReportButton } from "@/components/export-excel-report-button";
 import { FilterDateRangeFields } from "@/components/filter-date-range-fields";
@@ -133,7 +133,7 @@ export function EstoqueCategoriaView({
   items,
   stockCategoryOptions,
 }: {
-  category: InventoryCategory;
+  category: ManagedInventoryCategory;
   title: string;
   items: InventoryItemRow[];
   stockCategoryOptions: readonly { id: string; name: string }[];

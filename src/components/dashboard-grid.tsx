@@ -90,23 +90,13 @@ export function DashboardGrid({ data }: { data: DashboardSnapshot }) {
           </p>
         </Card>
 
-        <Card title="Materiais escolares" href="/estoque/almoxarifado?aba=escolar" moduleId="stock_school">
+        <Card title="Material de escritório" href="/estoque/almoxarifado?aba=escolar" moduleId="stock_school">
           <p>
             <strong className="text-ink">{data.stock.byCategory.SCHOOL_SUPPLIES ?? 0}</strong> itens
           </p>
           <p>
             <strong className="text-caution">{data.stock.lowByCategory.SCHOOL_SUPPLIES ?? 0}</strong>{" "}
             abaixo do mínimo
-          </p>
-        </Card>
-
-        <Card title="Farmácia escolar" href="/estoque/almoxarifado?aba=farmacia" moduleId="stock_pharmacy">
-          <p>
-            <strong className="text-ink">{data.stock.byCategory.PHARMACY ?? 0}</strong> itens
-          </p>
-          <p>
-            <strong className="text-caution">{data.stock.lowByCategory.PHARMACY ?? 0}</strong> abaixo
-            do mínimo
           </p>
         </Card>
 

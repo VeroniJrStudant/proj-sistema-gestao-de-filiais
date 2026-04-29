@@ -4,7 +4,6 @@ import { inventoryStockListRevalidatePath } from "@/lib/inventory-stock-meta";
 const LEGACY_STOCK_PATHS = [
   "/estoque/limpeza",
   "/estoque/escolar",
-  "/estoque/farmacia",
   "/estoque/zeladoria",
 ] as const;
 

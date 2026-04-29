@@ -10,7 +10,6 @@ export default async function FuncoesECategoriasPage() {
     categoriesSupplier,
     categoriesStockCleaning,
     categoriesStockSchool,
-    categoriesStockPharmacy,
     categoriesStockBuilding,
   ] = await Promise.all([
     prisma.employeeJobRole.findMany({
@@ -33,10 +32,6 @@ export default async function FuncoesECategoriasPage() {
       orderBy: [{ sortOrder: "asc" }, { name: "asc" }],
     }),
     prisma.registryCategory.findMany({
-      where: { scope: CategoryScope.STOCK_PHARMACY },
-      orderBy: [{ sortOrder: "asc" }, { name: "asc" }],
-    }),
-    prisma.registryCategory.findMany({
       where: { scope: CategoryScope.STOCK_BUILDING_MAINTENANCE },
       orderBy: [{ sortOrder: "asc" }, { name: "asc" }],
     }),
@@ -49,7 +44,7 @@ export default async function FuncoesECategoriasPage() {
         <h1 className="mt-2 text-2xl font-bold tracking-tight text-ink sm:text-3xl">Funções e categorias</h1>
         <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted">
           Cadastre funções, categorias de funcionários e fornecedores e categorias por módulo de estoque (limpeza,
-          material escolar, farmácia e zeladoria). Itens inativos não aparecem nas listas de seleção.
+          material de escritório e zeladoria). Itens inativos não aparecem nas listas de seleção.
         </p>
         <p className="mt-4">
           <Link href="/administracao" className="text-sm font-medium text-accent hover:underline">
@@ -64,7 +59,6 @@ export default async function FuncoesECategoriasPage() {
         initialCategoriesSupplier={categoriesSupplier}
         initialCategoriesStockCleaning={categoriesStockCleaning}
         initialCategoriesStockSchool={categoriesStockSchool}
-        initialCategoriesStockPharmacy={categoriesStockPharmacy}
         initialCategoriesStockBuilding={categoriesStockBuilding}
       />
     </div>

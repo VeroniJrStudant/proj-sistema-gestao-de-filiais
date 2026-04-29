@@ -20,13 +20,10 @@ export function Sidebar({
 }) {
   const pathname = usePathname();
   const financeModule = modules.find((m) => m.id === "finance");
-  const hasModule = (id: ModuleDefinition["id"]) =>
-    modules.some((m) => m.id === id);
   const showAlmoxarifado = modules.some(
     (m) =>
       m.id === "stock_cleaning" ||
       m.id === "stock_school" ||
-      m.id === "stock_pharmacy" ||
       m.id === "stock_building",
   );
   const branchesModule = modules.find((m) => m.id === "branches");
@@ -66,7 +63,6 @@ export function Sidebar({
             propertiesHref={propertiesModule?.href ?? "/imoveis"}
             parkingHref={parkingModule?.href ?? "/estacionamentos"}
             servicosHref={leasesModule?.href ?? "/servicos/catalogo"}
-            showLeaseAuxNav={!!leasesModule}
           />
         ) : null}
         <AdminNavGroup
@@ -81,16 +77,6 @@ export function Sidebar({
         <NavLink href="/clientes" active={pathname === "/clientes" || pathname.startsWith("/clientes/")}>
           Clientes
         </NavLink>
-        {hasModule("attendance") ? (
-          <NavLink
-            href="/presenca"
-            active={
-              pathname === "/presenca" || pathname.startsWith("/presenca/")
-            }
-          >
-            Registro de entrada/saída
-          </NavLink>
-        ) : null}
         <SecurityNavGroup pathname={pathname} />
       </nav>
       <div className="border-t border-line p-2">
@@ -290,8 +276,6 @@ function AdminNavGroup({
     pathname.startsWith("/estoque/limpeza/") ||
     pathname === "/estoque/escolar" ||
     pathname.startsWith("/estoque/escolar/") ||
-    pathname === "/estoque/farmacia" ||
-    pathname.startsWith("/estoque/farmacia/") ||
     pathname === "/estoque/zeladoria" ||
     pathname.startsWith("/estoque/zeladoria/");
   const isUsuarios =
@@ -444,14 +428,12 @@ function OpsNavGroup({
   propertiesHref,
   parkingHref,
   servicosHref,
-  showLeaseAuxNav,
 }: {
   pathname: string;
   branchesHref: string;
   propertiesHref: string;
   parkingHref: string;
   servicosHref: string;
-  showLeaseAuxNav: boolean;
 }) {
   const isUnder =
     pathname === branchesHref ||
@@ -463,11 +445,7 @@ function OpsNavGroup({
     pathname === servicosHref ||
     pathname.startsWith(`${servicosHref}/`) ||
     pathname === "/servicos" ||
-    pathname.startsWith("/servicos/") ||
-    pathname === "/locacoes" ||
-    pathname.startsWith("/locacoes/") ||
-    pathname === "/locatarios" ||
-    pathname.startsWith("/locatarios/");
+    pathname.startsWith("/servicos/");
 
   const [open, setOpen] = useState(isUnder);
   const showSubmenu = open;
@@ -478,20 +456,12 @@ function OpsNavGroup({
     pathname === propertiesHref || pathname.startsWith(`${propertiesHref}/`);
   const isParking =
     pathname === parkingHref || pathname.startsWith(`${parkingHref}/`);
-  const isLeaseLocacoes =
-    pathname === "/servicos/locacoes" || pathname.startsWith("/servicos/locacoes/");
-  const isLeaseLocatarios =
-    pathname === "/servicos/locatarios" || pathname.startsWith("/servicos/locatarios/");
 
   const isServicos =
     pathname === servicosHref ||
     pathname.startsWith(`${servicosHref}/`) ||
     pathname === "/servicos" ||
-    pathname.startsWith("/servicos/") ||
-    pathname === "/locacoes" ||
-    pathname.startsWith("/locacoes/") ||
-    pathname === "/locatarios" ||
-    pathname.startsWith("/locatarios/");
+    pathname.startsWith("/servicos/");
 
   return (
     <div className="rounded-lg">
@@ -580,7 +550,7 @@ function OpsNavGroup({
             <Link
               href={servicosHref}
               className={`block rounded-md px-2 py-1.5 text-xs leading-snug transition-colors ${
-                isServicos && !isLeaseLocacoes && !isLeaseLocatarios
+                isServicos
                   ? "bg-accent text-on-accent"
                   : "text-muted hover:bg-elevated-2 hover:text-ink"
               }`}

@@ -4,15 +4,19 @@ import { revalidatePath } from "next/cache";
 import { InventoryCategory, Prisma } from "@/generated/prisma/client";
 import { parseBrlStringToCents } from "@/lib/brl-parse";
 import { INVENTORY_CATEGORY_TO_REGISTRY_SCOPE } from "@/lib/inventory-registry-scope";
-import { INVENTORY_STOCK_META, inventoryStockListRevalidatePath } from "@/lib/inventory-stock-meta";
+import {
+  INVENTORY_STOCK_META,
+  inventoryStockListRevalidatePath,
+  type ManagedInventoryCategory,
+} from "@/lib/inventory-stock-meta";
 import { prisma } from "@/lib/prisma";
 import { saveInventoryItemPhoto } from "@/lib/save-inventory-photo";
 
 export type CreateInventoryItemState = { ok: true } | { ok: false; error: string };
 
-function parseInventoryCategory(raw: string): InventoryCategory | null {
+function parseInventoryCategory(raw: string): ManagedInventoryCategory | null {
   const v = raw.trim() as InventoryCategory;
-  return v in INVENTORY_STOCK_META ? v : null;
+  return v in INVENTORY_STOCK_META ? (v as ManagedInventoryCategory) : null;
 }
 
 async function nextSkuForYear(
@@ -37,11 +41,8 @@ async function nextSkuForYear(
   return `${prefix}${String(seq).padStart(4, "0")}`;
 }
 
-export async function previewNextInventorySku(category: InventoryCategory): Promise<string> {
+export async function previewNextInventorySku(category: ManagedInventoryCategory): Promise<string> {
   const meta = INVENTORY_STOCK_META[category];
-  if (!meta) {
-    throw new Error("Categoria de estoque inválida.");
-  }
   const year = new Date().getFullYear();
   return nextSkuForYear(prisma, meta.skuPrefix, year);
 }

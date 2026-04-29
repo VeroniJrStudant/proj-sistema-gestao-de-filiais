@@ -6,8 +6,6 @@ export const AREA = {
   filiaisActions: "src/app/(main)/filiais/actions.ts",
   imoveisActions: "src/app/(main)/imoveis/actions.ts",
   estacionamentosActions: "src/app/(main)/estacionamentos/actions.ts",
-  locatariosActions: "src/app/(main)/locatarios/actions.ts",
-  locacoesActions: "src/app/(main)/locacoes/actions.ts",
   moduleGate: "src/components/module-gate.tsx",
   modulesLib: "src/lib/modules.ts",
   themeToggle: "src/components/theme-toggle.tsx",

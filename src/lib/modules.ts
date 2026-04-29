@@ -6,7 +6,6 @@ export type ModuleId =
   | "attendance"
   | "stock_cleaning"
   | "stock_school"
-  | "stock_pharmacy"
   | "stock_building"
   | "cameras"
   | "finance"
@@ -40,17 +39,10 @@ export const MODULE_REGISTRY: readonly ModuleDefinition[] = [
   },
   {
     id: "stock_school",
-    label: "Estoque — materiais escolares",
-    description: "Papelaria, jogos e materiais didáticos.",
+    label: "Estoque — material de escritório",
+    description: "Papelaria e material de escritório.",
     href: "/estoque/almoxarifado?aba=escolar",
     inventoryCategories: ["SCHOOL_SUPPLIES"],
-  },
-  {
-    id: "stock_pharmacy",
-    label: "Farmácia escolar",
-    description: "Itens de primeiros socorros e uso controlado.",
-    href: "/estoque/almoxarifado?aba=farmacia",
-    inventoryCategories: ["PHARMACY"],
   },
   {
     id: "stock_building",

@@ -200,14 +200,12 @@ async function main() {
       { name: "Administrativo", scope: CategoryScope.EMPLOYEE, sortOrder: 1 },
       { name: "Apoio operacional", scope: CategoryScope.EMPLOYEE, sortOrder: 2 },
       { name: "Alimentação", scope: CategoryScope.SUPPLIER, sortOrder: 0 },
-      { name: "Material escolar", scope: CategoryScope.SUPPLIER, sortOrder: 1 },
+      { name: "Material de escritório", scope: CategoryScope.SUPPLIER, sortOrder: 1 },
       { name: "Serviços e manutenção", scope: CategoryScope.SUPPLIER, sortOrder: 2 },
       { name: "Higiene e limpeza", scope: CategoryScope.STOCK_CLEANING, sortOrder: 0 },
       { name: "Descartáveis", scope: CategoryScope.STOCK_CLEANING, sortOrder: 1 },
       { name: "Papelaria", scope: CategoryScope.STOCK_SCHOOL_SUPPLIES, sortOrder: 0 },
       { name: "Didáticos e jogos", scope: CategoryScope.STOCK_SCHOOL_SUPPLIES, sortOrder: 1 },
-      { name: "Primeiros socorros", scope: CategoryScope.STOCK_PHARMACY, sortOrder: 0 },
-      { name: "Medicamentos", scope: CategoryScope.STOCK_PHARMACY, sortOrder: 1 },
       { name: "Elétrica e iluminação", scope: CategoryScope.STOCK_BUILDING_MAINTENANCE, sortOrder: 0 },
       { name: "Hidráulica", scope: CategoryScope.STOCK_BUILDING_MAINTENANCE, sortOrder: 1 },
     ],
@@ -408,7 +406,7 @@ async function main() {
   });
 
   console.log(
-    "Seed concluído: empresa fictícia “Sol Nascente” em CompanySettings; 7 salas físicas, turnos com aula 45 min + lanche 15 min, 20 alunos (campos aleatórios), 12 funcionários (campos aleatórios), 24 responsáveis (campos aleatórios), 4 turmas, 18 fornecedores (campos aleatórios), 32 itens de estoque (8 por categoria: limpeza, escolar, farmácia, zeladoria), movimentações, presença, notas, câmeras e lançamentos.",
+    "Seed concluído: empresa fictícia “Sol Nascente” em CompanySettings; 7 salas físicas, turnos com aula 45 min + lanche 15 min, 20 alunos (campos aleatórios), 12 funcionários (campos aleatórios), 24 responsáveis (campos aleatórios), 4 turmas, 18 fornecedores (campos aleatórios), 32 itens de estoque (8 por categoria: limpeza, material de escritório, farmácia, zeladoria), movimentações, presença, notas, câmeras e lançamentos.",
   );
   console.log(`Senha padrão dos usuários de teste: ${defaultPassword}`);
 }

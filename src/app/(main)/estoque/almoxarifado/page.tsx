@@ -52,7 +52,7 @@ export default async function AlmoxarifadoPage({
         <p className="text-[11px] font-semibold uppercase tracking-wider text-accent-muted">Operação</p>
         <h1 className="mt-1 text-lg font-semibold text-ink sm:text-xl">Almoxarifado</h1>
         <p className="mt-1 text-sm text-muted">
-          Estoque por setor: limpeza, material escolar, farmácia escolar e zeladoria. Escolha a aba abaixo.
+          Estoque por setor: limpeza, material de escritório e zeladoria. Escolha a aba abaixo.
         </p>
       </header>
 

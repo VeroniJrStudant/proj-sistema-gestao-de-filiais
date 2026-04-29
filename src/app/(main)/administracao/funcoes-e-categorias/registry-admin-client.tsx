@@ -28,7 +28,6 @@ export function RegistryAdminClient({
   initialCategoriesSupplier,
   initialCategoriesStockCleaning,
   initialCategoriesStockSchool,
-  initialCategoriesStockPharmacy,
   initialCategoriesStockBuilding,
 }: {
   initialJobRoles: JobRoleRow[];
@@ -36,7 +35,6 @@ export function RegistryAdminClient({
   initialCategoriesSupplier: CatRow[];
   initialCategoriesStockCleaning: CatRow[];
   initialCategoriesStockSchool: CatRow[];
-  initialCategoriesStockPharmacy: CatRow[];
   initialCategoriesStockBuilding: CatRow[];
 }) {
   const router = useRouter();
@@ -48,7 +46,6 @@ export function RegistryAdminClient({
     | "SUPPLIER"
     | "STOCK_CLEANING"
     | "STOCK_SCHOOL_SUPPLIES"
-    | "STOCK_PHARMACY"
     | "STOCK_BUILDING_MAINTENANCE"
   >("EMPLOYEE");
 
@@ -57,7 +54,6 @@ export function RegistryAdminClient({
   const [newCatSup, setNewCatSup] = useState("");
   const [newStockCleaning, setNewStockCleaning] = useState("");
   const [newStockSchool, setNewStockSchool] = useState("");
-  const [newStockPharmacy, setNewStockPharmacy] = useState("");
   const [newStockBuilding, setNewStockBuilding] = useState("");
 
   function refresh() {
@@ -138,22 +134,7 @@ export function RegistryAdminClient({
           onClick={() => setActiveTab("STOCK_SCHOOL_SUPPLIES")}
           disabled={pending}
         >
-          Material escolar
-        </button>
-        <button
-          type="button"
-          role="tab"
-          aria-selected={activeTab === "STOCK_PHARMACY"}
-          className={[
-            "rounded-md px-3 py-1.5 text-xs font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-40",
-            activeTab === "STOCK_PHARMACY"
-              ? "bg-accent text-on-accent shadow-sm"
-              : "text-muted hover:bg-line-soft hover:text-ink",
-          ].join(" ")}
-          onClick={() => setActiveTab("STOCK_PHARMACY")}
-          disabled={pending}
-        >
-          Farmácia
+          Material de escritório
         </button>
         <button
           type="button"
@@ -364,8 +345,8 @@ export function RegistryAdminClient({
 
       {activeTab === "STOCK_SCHOOL_SUPPLIES" ? (
         <section className="rounded-2xl border border-line bg-elevated-2 p-5 shadow-sm sm:p-6">
-          <h2 className="text-lg font-semibold text-ink">Material escolar</h2>
-          <p className="mt-1 text-sm text-muted">Categorias de papelaria, didáticos e jogos.</p>
+          <h2 className="text-lg font-semibold text-ink">Material de escritório</h2>
+          <p className="mt-1 text-sm text-muted">Categorias de papelaria, consumíveis e itens de escritório.</p>
           <form
             className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-end"
             onSubmit={(e) => {
@@ -397,48 +378,6 @@ export function RegistryAdminClient({
           </form>
           <CategoryList
             rows={initialCategoriesStockSchool}
-            disabled={pending}
-            onError={setError}
-            onSaved={refresh}
-          />
-        </section>
-      ) : null}
-
-      {activeTab === "STOCK_PHARMACY" ? (
-        <section className="rounded-2xl border border-line bg-elevated-2 p-5 shadow-sm sm:p-6">
-          <h2 className="text-lg font-semibold text-ink">Farmácia</h2>
-          <p className="mt-1 text-sm text-muted">Categorias de primeiros socorros e itens controlados.</p>
-          <form
-            className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-end"
-            onSubmit={(e) => {
-              e.preventDefault();
-              setError(null);
-              startTransition(async () => {
-                const r = await createRegistryCategory(newStockPharmacy, "STOCK_PHARMACY");
-                if (!r.ok) {
-                  setError(r.error);
-                  return;
-                }
-                setNewStockPharmacy("");
-                refresh();
-              });
-            }}
-          >
-            <label className="min-w-0 flex-1">
-              <span className={labelClass}>Nova categoria</span>
-              <input
-                className={inputClass}
-                value={newStockPharmacy}
-                onChange={(e) => setNewStockPharmacy(e.target.value)}
-                maxLength={120}
-              />
-            </label>
-            <button type="submit" className={btnPrimary} disabled={pending}>
-              Adicionar
-            </button>
-          </form>
-          <CategoryList
-            rows={initialCategoriesStockPharmacy}
             disabled={pending}
             onError={setError}
             onSaved={refresh}

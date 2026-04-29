@@ -11,7 +11,6 @@ export const INVENTORY_CATEGORY_TO_REGISTRY_SCOPE: Record<InventoryCategory, Cat
 export const STOCK_CATEGORY_SCOPES: readonly CategoryScope[] = [
   CategoryScope.STOCK_CLEANING,
   CategoryScope.STOCK_SCHOOL_SUPPLIES,
-  CategoryScope.STOCK_PHARMACY,
   CategoryScope.STOCK_BUILDING_MAINTENANCE,
 ] as const;
 
