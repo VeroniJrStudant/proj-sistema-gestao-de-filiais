@@ -596,6 +596,9 @@ model FinancialRecord {
   property    Property?          @relation(fields: [propertyId], references: [id], onDelete: SetNull)
   parkingFacilityId String?
   parkingFacility   ParkingFacility? @relation(fields: [parkingFacilityId], references: [id], onDelete: SetNull)
+  /** Serviço particular (catálogo) vinculado ao lançamento, quando aplicável. */
+  particularServiceId String?
+  particularService   ParticularService? @relation(fields: [particularServiceId], references: [id], onDelete: SetNull)
   /** Sessão de entrada/saída que originou o lançamento (ex.: estacionamento). */
   accessSessionId String? @map("accessRecordId")
   accessSession   AccessSession? @relation(fields: [accessSessionId], references: [id], onDelete: SetNull)
@@ -611,6 +614,7 @@ model FinancialRecord {
   @@index([branchId])
   @@index([propertyId])
   @@index([parkingFacilityId])
+  @@index([particularServiceId])
   @@index([accessSessionId])
 }
 
@@ -880,6 +884,8 @@ model ParticularService {
   notes     String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  financialRecords FinancialRecord[]
 
   @@index([title])
   @@index([updatedAt])

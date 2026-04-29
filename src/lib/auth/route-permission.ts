@@ -8,6 +8,9 @@ export function permissionForPath(pathname: string): PermissionId | null {
   if (pathname === "/") {
     return "dashboard.view";
   }
+  if (pathname.startsWith("/relatorios")) {
+    return "dashboard.view";
+  }
   if (pathname.startsWith("/funcionarios") || pathname.startsWith("/professores")) {
     return "teachers.access";
   }

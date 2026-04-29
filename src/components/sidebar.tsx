@@ -48,6 +48,9 @@ export function Sidebar({
         <NavLink href="/" active={pathname === "/"}>
           Indicadores
         </NavLink>
+        <NavLink href="/relatorios" active={pathname === "/relatorios" || pathname.startsWith("/relatorios/")}>
+          Relatórios
+        </NavLink>
         {financeModule ? (
           <FinanceNavGroup
             label={financeModule.label}
